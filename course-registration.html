@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Registration Form Generator — RUET FormKit</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Layout theme must be applied before render -->
+<script>
+(function(){
+  const saved = localStorage.getItem('ruetFormkit_theme');
+  const dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+})();
+</script>
+<link rel="stylesheet" href="layout.css">
+<style>
+/* ── Page-specific tokens ── */
+:root{
+  --bg-primary:#fff;
+  --bg-glass:rgba(255,255,255,0.97);
+  --text-primary:#2c3e50;
+  --text-secondary:#adb5bd;
+  --border-color:rgba(0,0,0,0.1);
+  --shadow-color:rgba(0,0,0,0.08);
+  --card-bg:rgba(240,240,240,0.4);
+  --table-hover:rgba(52,152,219,0.05);
+  --input-bg:#fff;
+  --input-border:#ced4da;
+}
+[data-theme="dark"]{
+  --bg-primary:#0d1117;
+  --bg-glass:rgba(15,23,42,0.97);
+  --text-primary:#e2e8f0;
+  --text-secondary:#64748b;
+  --border-color:rgba(255,255,255,0.1);
+  --shadow-color:rgba(0,0,0,0.3);
+  --card-bg:rgba(30,41,59,0.5);
+  --table-hover:rgba(96,165,250,0.06);
+  --input-bg:#1e293b;
+  --input-border:rgba(255,255,255,0.12);
+}
+*{box-sizing:border-box;}
+body{
+  background-color:var(--bg-primary);
+  background-image:
+    radial-gradient(ellipse at 15% 10%,rgba(255,165,120,.18) 0%,transparent 45%),
+    radial-gradient(ellipse at 85% 90%,rgba(255,200,150,.13) 0%,transparent 45%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color:var(--text-primary);
+}
+[data-theme="dark"] body{
+  background-image:
+    radial-gradient(ellipse at 15% 10%,rgba(61,110,240,.12) 0%,transparent 45%),
+    radial-gradient(ellipse at 85% 90%,rgba(124,58,237,.08) 0%,transparent 45%);
+  background-attachment: fixed;
+}
+.page-content{padding:24px 12px 48px;}
+@media(max-width:768px){.page-content{padding:16px 0 36px;}}
+
+/* Page title banner */
+.page-banner{text-align:center;margin-bottom:36px;padding:0 12px;}
+.page-banner h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(20px,4vw,30px);font-weight:800;color:var(--text-primary);margin-bottom:6px;}
+.page-banner p{color:var(--text-secondary);font-size:.95rem;}
+
+.glass-box{background:var(--bg-glass);backdrop-filter:blur(10px);padding:30px;border-radius:20px;box-shadow:0 20px 40px var(--shadow-color);border:1px solid var(--border-color);}
+@media(max-width:768px){.glass-box{padding:15px;border-radius:12px;}}
+.form-section{background:var(--card-bg);border-radius:12px;padding:20px;margin-bottom:22px;border:1px solid var(--border-color);overflow:visible;}
+@media(max-width:768px){.form-section{padding:15px 12px;}}
+.btn-primary-custom{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:10px 24px;border-radius:9px;font-size:15px;font-weight:500;cursor:pointer;transition:all .25s;}
+.btn-primary-custom:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(102,126,234,.35);color:white;}
+.btn-success-custom{background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;border:none;padding:10px 24px;border-radius:9px;font-size:15px;font-weight:500;cursor:pointer;transition:all .25s;}
+.btn-success-custom:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(46,204,113,.35);color:white;}
+.btn-load{background:linear-gradient(135deg,#f39c12,#e67e22);color:white;border:none;padding:10px 20px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn-load:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(243,156,18,.35);}
+.btn-add-course{background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;border:none;padding:10px 22px;border-radius:9px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px;cursor:pointer;transition:all .25s;}
+.btn-add-course:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(46,204,113,.3);color:white;}
+.field-wrap{position:relative;z-index:1;}
+.field-wrap.ac-open{z-index:10000;}
+.ac-box{position:absolute;z-index:10001;top:100%;left:0;right:0;max-height:320px;overflow-y:auto;background:var(--bg-glass);color:var(--text-primary);border:1px solid var(--border-color);border-top:none;border-radius:0 0 10px 10px;box-shadow:0 8px 24px var(--shadow-color);display:none;}
+.table-responsive{overflow:visible !important;}
+.table{overflow:visible;color:var(--text-primary);}
+tr,td,th{overflow:visible;position:static;}
+.ac-item{padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--border-color);transition:background .18s;}
+.ac-item:last-child{border-bottom:none;}
+.ac-item:hover,.ac-item.selected{background:var(--table-hover);}
+.ac-code{font-weight:700;font-size:.9rem;color:var(--text-primary);}
+.ac-sub{font-size:.82rem;color:var(--text-secondary);margin-top:2px;line-height:1.3;}
+.ac-badge{background:#6c757d;color:#fff;padding:1px 7px;border-radius:4px;font-size:.78rem;white-space:nowrap;}
+.ac-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.form-control{background:var(--input-bg);color:var(--text-primary);border:1px solid var(--input-border);border-radius:8px;transition:all .25s;}
+.form-control:focus{background:var(--input-bg);color:var(--text-primary);border-color:#86b7fe;box-shadow:0 0 0 .22rem rgba(13,110,253,.2);}
+.form-control::placeholder{color:var(--text-secondary);}
+.table thead th{background:var(--card-bg);color:var(--text-primary);border-color:var(--border-color);}
+.course-row:hover{background:var(--table-hover);}
+.courses-table-container{display:block;}
+.courses-cards-container{display:none;}
+@media(max-width:767px){.courses-table-container{display:none;}.courses-cards-container{display:block;}}
+.course-card{background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 3px 10px var(--shadow-color);transition:all .25s;}
+.course-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px var(--shadow-color);}
+.course-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--card-bg);}
+.card-num{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+.card-fields{display:grid;grid-template-columns:1fr 2fr 0.7fr;gap:12px;}
+@media(max-width:480px){.card-fields{grid-template-columns:1fr;}}
+.card-field label{font-size:13px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:5px;}
+.btn-remove{background:#dc3545;color:#fff;border:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;flex-shrink:0;}
+.btn-remove:hover{background:#c82333;transform:scale(1.1);}
+.btn-remove:disabled{background:#6c757d;cursor:not-allowed;transform:none;}
+#backlogInput{word-break:break-word!important;overflow-wrap:break-word!important;white-space:pre-wrap!important;resize:vertical;min-height:80px;overflow-y:auto!important;}
+.total-bar{background:var(--card-bg);border:2px solid var(--border-color);border-radius:10px;padding:13px 18px;text-align:center;margin-top:18px;}
+.total-val{font-size:22px;font-weight:700;color:#2ecc71;margin-left:6px;}
+#pdfFrame{width:100%;height:880px;border:2px solid var(--border-color);border-radius:10px;background:#fff;}
+#loadOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99999;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-size:17px;}
+#loadOverlay.active{display:flex;}
+.spinner{width:44px;height:44px;border:5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .75s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.modal-content{background:var(--bg-glass);border:1px solid var(--border-color);}
+.modal-header,.modal-footer{border-color:var(--border-color);background:var(--card-bg);}
+.modal-title,.modal-body{color:var(--text-primary);}
+.info-section{margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border-color);}
+.info-section:last-child{border:none;margin-bottom:0;padding-bottom:0;}
+.info-section h5{color:#3498db;font-weight:600;margin-bottom:12px;}
+.info-section li{margin-bottom:7px;}
+.dev-card{background:rgba(52,152,219,.1);padding:14px;border-radius:10px;border-left:4px solid #3498db;}
+.dev-card p{margin-bottom:4px;}
+.load-banner{background:linear-gradient(135deg,rgba(243,156,18,.12),rgba(230,126,34,.12));border:1px solid rgba(243,156,18,.35);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap;}
+.load-banner-text{flex:1;min-width:160px;font-size:.9rem;color:var(--text-primary);}
+.toast-msg{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:13px 20px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.18);font-size:14px;font-weight:500;color:#fff;min-width:240px;max-width:420px;animation:toastIn .3s cubic-bezier(.175,.885,.32,1.275) both;}
+.toast-msg.toast-warning{background:linear-gradient(135deg,#f39c12,#e67e22);}
+.toast-msg.toast-error{background:linear-gradient(135deg,#e74c3c,#c0392b);}
+.toast-msg.toast-success{background:linear-gradient(135deg,#2ecc71,#27ae60);}
+.toast-msg.toast-info{background:linear-gradient(135deg,#3498db,#2980b9);}
+.toast-msg.toast-out{animation:toastOut .3s ease forwards;}
+.toast-icon{font-size:18px;flex-shrink:0;}
+@keyframes toastIn{from{opacity:0;transform:translateY(-16px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.88)}}
+</style>
+</head>
+<body>
+
+<!-- Header injected here -->
+<div id="fk-header"></div>
+
+<!-- Loading overlay -->
+<div id="loadOverlay">
+  <div class="spinner"></div>
+  <span id="loadMsg">Loading courses…</span>
+</div>
+
+<!-- Toast notification -->
+<div id="toastContainer" style="position:fixed;top:calc(68px + 16px);left:50%;transform:translateX(-50%);z-index:999999;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;"></div>
+
+<div class="page-content">
+
+  <!-- Page banner with logo -->
+  <div class="page-banner">
+    <img src="c-logo.png" alt="RUET Logo" style="height:115px;width:auto;object-fit:contain;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;" onerror="this.style.display='none'">
+    <h1>Course Registration Form Generator</h1>
+    <p>Generate your course registration form in the official RUET format</p>
+  </div>
+
+  <div class="container">
+  <div class="glass-box">
+
+    <!-- Instructions button — centred -->
+    <div style="display:flex;justify-content:center;margin-bottom:20px;">
+      <div data-bs-toggle="modal" data-bs-target="#infoModal" style="display:inline-flex;align-items:center;gap:8px;background:var(--card-bg);padding:8px 20px;border-radius:25px;border:1px solid var(--border-color);box-shadow:0 2px 8px var(--shadow-color);cursor:pointer;user-select:none;transition:all .2s;">
+        <i class="bi bi-journal-text" style="font-size:17px;color:var(--text-primary)"></i>
+        <span style="font-size:13px;color:var(--text-primary);font-weight:600;letter-spacing:.3px;">Instructions</span>
+      </div>
+    </div>
+
+    <!-- Student Info -->
+    <div class="form-section">
+      <h5 class="mb-3"><i class="bi bi-person-badge me-2"></i>Student Information</h5>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Department</label>
+          <div class="field-wrap">
+            <input type="text" id="deptInput" class="form-control" placeholder="e.g., Mechanical Engineering"
+              autocomplete="off" oninput="onDeptInput(this)" onfocus="onDeptFocus(this)">
+            <div class="ac-box" id="deptBox"></div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Roll No</label>
+          <input type="text" id="rollInput" class="form-control" placeholder="e.g., 2302001">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Registration No. with Session</label>
+          <input type="text" id="regInput" class="form-control" placeholder="e.g., 301/2023-2024">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Name</label>
+          <input type="text" id="nameInput" class="form-control" placeholder="Your full name">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Academic Session with Semester</label>
+          <div class="field-wrap">
+            <input type="text" id="sessionInput" class="form-control" placeholder="e.g., 2nd Year Odd Semester"
+              autocomplete="off" oninput="onSessionInput(this)" onfocus="onSessionFocus(this)" style="cursor:text">
+            <div class="ac-box" id="sessionBox"></div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Previously Earned Credit</label>
+          <input type="text" id="prevCreditInput" class="form-control" placeholder="e.g., 39.50">
+        </div>
+      </div>
+      <div class="load-banner">
+        <i class="bi bi-lightning-charge-fill" style="font-size:22px;color:#f39c12;flex-shrink:0"></i>
+        <div class="load-banner-text">
+          <strong>Auto-fill Courses:</strong> Select your department &amp; semester above, then click to load all courses automatically.
+        </div>
+        <button type="button" class="btn-load" onclick="loadCoursesForSemester()">
+          <i class="bi bi-cloud-download"></i> Load Courses
+        </button>
+      </div>
+    </div>
+
+    <!-- Courses Section -->
+    <div class="form-section">
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="bi bi-book me-2"></i>Courses to Register</h5>
+      </div>
+      <div class="courses-table-container">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th width="19%">Course No.</th>
+                <th width="55%">Course Title</th>
+                <th width="14%">Credit</th>
+                <th width="12%">Action</th>
+              </tr>
+            </thead>
+            <tbody id="courseRows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="courses-cards-container" id="courseCards"></div>
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <button type="button" onclick="addCourse()" class="btn-add-course mt-2 mt-md-0">
+          <i class="bi bi-plus-circle"></i> Add Course
+        </button>
+      </div>
+      <div class="total-bar">
+        <span style="font-size:16px;font-weight:600">Total Credit:</span>
+        <span class="total-val" id="totalCredit">0.00</span>
+      </div>
+    </div>
+
+    <!-- Backlog -->
+    <div class="form-section">
+      <h5 class="mb-3"><i class="bi bi-exclamation-triangle me-2"></i>Backlog Courses</h5>
+      <label class="form-label fw-semibold">Course No. of Backlog Courses (if any)</label>
+      <textarea id="backlogInput" class="form-control" rows="3"
+        oninput="autoResizeTextarea(this)" onblur="formatBacklogDisplay(this)"
+        placeholder="e.g., Math 1121, Chem 1121, Phy 1122 (comma separated)"></textarea>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex gap-3 justify-content-center flex-wrap mb-2">
+      <button type="button" onclick="previewPDF()" class="btn-primary-custom">
+        <i class="bi bi-eye me-1"></i> Preview PDF
+      </button>
+      <button type="button" onclick="downloadPDF()" class="btn-success-custom">
+        <i class="bi bi-download me-1"></i> Download PDF
+      </button>
+    </div>
+
+    <!-- PDF Preview (desktop only) -->
+    <div class="form-section mt-4 d-none d-lg-block">
+      <h5 class="mb-3"><i class="bi bi-file-pdf me-2"></i>Live Preview</h5>
+      <iframe id="pdfFrame"></iframe>
+    </div>
+
+  </div><!-- glass-box -->
+  </div><!-- container -->
+</div><!-- page-content -->
+
+<!-- Info Modal -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-journal-text me-2"></i>Instructions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="info-section">
+          <h5><i class="bi bi-file-earmark-text me-2"></i>About</h5>
+          <p>A specialized web app for RUET students to generate course registration forms in the official university format with smart autocomplete, auto-load, and PDF download.</p>
+        </div>
+        <div class="info-section">
+          <h5><i class="bi bi-list-check me-2"></i>How to Use</h5>
+          <ol style="padding-left:1.2rem;">
+            <li style="margin-bottom:10px"><strong>Fill Student Information</strong> — Department, Roll, Registration No., Name, Session, and Previous Credit.</li>
+            <li style="margin-bottom:10px"><strong>Auto-load Courses</strong> — Select dept &amp; semester then click <em>Load Courses</em>.</li>
+            <li style="margin-bottom:10px"><strong>Edit Manually</strong> — Click <em>Add Course</em> and use the autocomplete search.</li>
+            <li style="margin-bottom:0"><strong>Download PDF</strong> — Click <em>Download PDF</em> to save the official RUET LEGAL-size form.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer injected here -->
+<div id="fk-footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="layout.js" data-page="course-registration"></script>
+<script>
+'use strict';
+let deptDB=[];let courseDB=[];
+async function initData(){showLoader('Loading course database…');try{const res=await fetch('courses.json');if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();deptDB=data.departments||[];courseDB=data.courses||[];}catch(e){console.warn('courses.json not found. Manual input only.');}finally{hideLoader();}}
+const SEMESTERS=[{label:'1st Year Odd Semester',year:1,sem:1},{label:'1st Year Even Semester',year:1,sem:2},{label:'2nd Year Odd Semester',year:2,sem:1},{label:'2nd Year Even Semester',year:2,sem:2},{label:'3rd Year Odd Semester',year:3,sem:1},{label:'3rd Year Even Semester',year:3,sem:2},{label:'4th Year Odd Semester',year:4,sem:1},{label:'4th Year Even Semester',year:4,sem:2},{label:'5th Year Odd Semester',year:5,sem:1},{label:'5th Year Even Semester',year:5,sem:2}];
+let selectedSemester=null;let selectedDeptCode=null;
+function showLoader(msg){document.getElementById('loadMsg').textContent=msg||'Please wait…';document.getElementById('loadOverlay').classList.add('active');}
+function hideLoader(){document.getElementById('loadOverlay').classList.remove('active');}
+function showToast(msg,type='warning',duration=3500){const icons={warning:'bi-exclamation-triangle-fill',error:'bi-x-circle-fill',success:'bi-check-circle-fill',info:'bi-info-circle-fill'};const container=document.getElementById('toastContainer');const el=document.createElement('div');el.className=`toast-msg toast-${type}`;el.innerHTML=`<i class="bi ${icons[type]||icons.info} toast-icon"></i><span>${msg}</span>`;container.appendChild(el);setTimeout(()=>{el.classList.add('toast-out');setTimeout(()=>el.remove(),320);},duration);}
+let activeBox=null;let activeInput=null;
+function posAC(box,input){document.querySelectorAll('.field-wrap.ac-open').forEach(el=>el.classList.remove('ac-open'));const wrap=input.closest('.field-wrap');if(wrap)wrap.classList.add('ac-open');}
+function hideAC(){document.querySelectorAll('.ac-box').forEach(b=>{b.style.display='none';b.innerHTML='';});document.querySelectorAll('.field-wrap.ac-open').forEach(el=>el.classList.remove('ac-open'));activeBox=null;activeInput=null;}
+function onDeptInput(inp){selectedDeptCode=null;const q=inp.value.toLowerCase().trim();const box=document.getElementById('deptBox');const hits=q?deptDB.filter(d=>d.title.toLowerCase().includes(q)||d.fullName.toLowerCase().includes(q)):deptDB;renderDeptAC(box,hits,inp);}
+function onDeptFocus(inp){const q=inp.value.toLowerCase().trim();const box=document.getElementById('deptBox');const hits=q?deptDB.filter(d=>d.title.toLowerCase().includes(q)||d.fullName.toLowerCase().includes(q)):deptDB;renderDeptAC(box,hits,inp);}
+function renderDeptAC(box,hits,inp){if(!hits.length){box.style.display='none';return;}box.innerHTML='';hits.forEach(dept=>{const el=document.createElement('div');el.className='ac-item';el.innerHTML=`<div class="ac-code">${dept.title}</div><div class="ac-sub">${dept.fullName}</div>`;el.addEventListener('mousedown',e=>{e.preventDefault();inp.value=dept.title;selectedDeptCode=dept.code;box.style.display='none';box.innerHTML='';});box.appendChild(el);});posAC(box,inp);box.style.display='block';activeBox=box;activeInput=inp;}
+function onSessionFocus(inp){renderSessionAC(inp);}function onSessionInput(inp){selectedSemester=null;renderSessionAC(inp);}
+function renderSessionAC(inp){const box=document.getElementById('sessionBox');const q=inp.value.trim().toLowerCase();box.innerHTML='';const filtered=q?SEMESTERS.filter(s=>s.label.toLowerCase().includes(q)):SEMESTERS;if(!filtered.length){box.style.display='none';return;}filtered.forEach(s=>{const el=document.createElement('div');el.className='ac-item';el.innerHTML=`<div class="ac-code">${s.label}</div>`;el.addEventListener('mousedown',e=>{e.preventDefault();inp.value=s.label;selectedSemester=s;box.style.display='none';box.innerHTML='';});box.appendChild(el);});posAC(box,inp);box.style.display='block';activeBox=box;activeInput=inp;}
+function loadCoursesForSemester(){if(!selectedDeptCode){showToast('Please select a Department from the dropdown first.','warning');document.getElementById('deptInput').focus();return;}if(!selectedSemester){showToast('Please select an Academic Session with Semester from the dropdown first.','warning');document.getElementById('sessionInput').focus();return;}const year=selectedSemester.year;const sem=selectedSemester.sem;const matched=courseDB.filter(c=>{if(c.dept!==selectedDeptCode)return false;const m=c.code.match(/(\d)(\d)\d\d/);if(!m)return false;return parseInt(m[1])===year&&parseInt(m[2])===sem;});if(!matched.length){showToast(`No courses found for ${document.getElementById('deptInput').value} — ${selectedSemester.label}.`,'error');return;}clearAllCourses();matched.forEach(c=>addCourseWithData(c.code,c.title,c.credit));calculateTotal();showToast(`Loaded ${matched.length} courses for ${selectedSemester.label}.`,'success',2500);}
+let rowCount=0;
+function clearAllCourses(){document.getElementById('courseRows').innerHTML='';document.getElementById('courseCards').innerHTML='';rowCount=0;}
+function addCourse(){addCourseWithData('','','');}
+function addCourseWithData(code,title,credit){const id=rowCount++;addDesktopRow(id,code,title,credit);addMobileCard(id,code,title,credit);updateRemoveBtns();calculateTotal();}
+function addDesktopRow(id,code,title,credit){const tr=document.createElement('tr');tr.className='course-row';tr.setAttribute('data-cid',id);tr.innerHTML=`<td><div class="field-wrap"><input type="text" class="form-control cno" value="${esc(code)}" placeholder="ME 2101" autocomplete="off" oninput="onCodeInput(this)" onfocus="onCodeFocus(this)"><div class="ac-box" id="codeBox-${id}"></div></div></td><td><div class="field-wrap"><input type="text" class="form-control ctitle" value="${esc(title)}" placeholder="Course Title" autocomplete="off" oninput="onTitleInput(this)" onfocus="onTitleFocus(this)"><div class="ac-box" id="titleBox-${id}"></div></div></td><td><input type="text" class="form-control ccredit" value="${esc(credit)}" placeholder="3.00" oninput="calculateTotal()"></td><td><button type="button" onclick="removeCourse(${id})" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button></td>`;document.getElementById('courseRows').appendChild(tr);}
+function addMobileCard(id,code,title,credit){const num=document.querySelectorAll('#courseCards .course-card').length+1;const card=document.createElement('div');card.className='course-card';card.setAttribute('data-cid',id);card.innerHTML=`<div class="course-card-header"><div class="card-num">${num}</div><strong>Course ${num}</strong><button type="button" onclick="removeCourse(${id})" class="btn-remove"><i class="bi bi-trash"></i></button></div><div class="card-fields"><div class="card-field"><label>Course No.</label><div class="field-wrap"><input type="text" class="form-control cno-m" value="${esc(code)}" placeholder="ME 2101" autocomplete="off" oninput="onCodeInput(this)" onfocus="onCodeFocus(this)"><div class="ac-box" id="codeBoxM-${id}"></div></div></div><div class="card-field"><label>Course Title</label><div class="field-wrap"><input type="text" class="form-control ctitle-m" value="${esc(title)}" placeholder="Course Title" autocomplete="off" oninput="onTitleInput(this)" onfocus="onTitleFocus(this)"><div class="ac-box" id="titleBoxM-${id}"></div></div></div><div class="card-field"><label>Credit</label><input type="text" class="form-control ccredit-m" value="${esc(credit)}" placeholder="3.00" oninput="syncMobileCredit(this,${id});calculateTotal()"></div></div>`;document.getElementById('courseCards').appendChild(card);}
+function removeCourse(id){document.querySelector(`tr[data-cid="${id}"]`)?.remove();document.querySelector(`.course-card[data-cid="${id}"]`)?.remove();updateRemoveBtns();renumberCards();calculateTotal();}
+function updateRemoveBtns(){const rows=document.querySelectorAll('#courseRows tr');const cards=document.querySelectorAll('#courseCards .course-card');const disable=rows.length<=1;rows.forEach(r=>{const b=r.querySelector('.btn-danger');if(b)b.disabled=disable;});cards.forEach(c=>{const b=c.querySelector('.btn-remove');if(b)b.disabled=disable;});}
+function renumberCards(){document.querySelectorAll('#courseCards .course-card').forEach((c,i)=>{const n=c.querySelector('.card-num');if(n)n.textContent=i+1;const h=c.querySelector('.course-card-header strong');if(h)h.textContent=`Course ${i+1}`;});}
+function syncMobileCredit(inp,id){const row=document.querySelector(`tr[data-cid="${id}"]`);if(row){const d=row.querySelector('.ccredit');if(d)d.value=inp.value;}}
+function esc(s){return(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function getRowCtx(input){const tr=input.closest('tr');if(tr){const id=tr.getAttribute('data-cid');return{noInp:tr.querySelector('.cno'),ttInp:tr.querySelector('.ctitle'),crInp:tr.querySelector('.ccredit'),codeBox:document.getElementById(`codeBox-${id}`),titleBox:document.getElementById(`titleBox-${id}`),isMobile:false,id};}const card=input.closest('.course-card');if(card){const id=card.getAttribute('data-cid');return{noInp:card.querySelector('.cno-m'),ttInp:card.querySelector('.ctitle-m'),crInp:card.querySelector('.ccredit-m'),codeBox:document.getElementById(`codeBoxM-${id}`),titleBox:document.getElementById(`titleBoxM-${id}`),isMobile:true,id};}return{};}
+function renderCourseAC(box,hits,ctx,input){if(!hits.length){box.style.display='none';return;}box.innerHTML='';hits.forEach(c=>{const el=document.createElement('div');el.className='ac-item';el.innerHTML=`<div class="ac-row"><span class="ac-code">${c.code}</span><span class="ac-badge">${c.credit} cr</span></div><div class="ac-sub">${c.title}</div>`;el.addEventListener('mousedown',e=>{e.preventDefault();if(ctx.noInp)ctx.noInp.value=c.code;if(ctx.ttInp)ctx.ttInp.value=c.title;if(ctx.crInp)ctx.crInp.value=c.credit;if(ctx.isMobile)syncCardToTable(ctx);box.style.display='none';box.innerHTML='';calculateTotal();});box.appendChild(el);});posAC(box,input);box.style.display='block';activeBox=box;activeInput=input;}
+function syncCardToTable(ctx){const row=document.querySelector(`tr[data-cid="${ctx.id}"]`);if(!row)return;row.querySelector('.cno').value=ctx.noInp?.value||'';row.querySelector('.ctitle').value=ctx.ttInp?.value||'';row.querySelector('.ccredit').value=ctx.crInp?.value||'';}
+function onCodeInput(inp){const q=inp.value.trim();const ctx=getRowCtx(inp);if(!ctx.codeBox)return;if(q.length<2){ctx.codeBox.style.display='none';return;}const hits=courseDB.filter(c=>c.code.toLowerCase().includes(q.toLowerCase())).slice(0,20);renderCourseAC(ctx.codeBox,hits,ctx,inp);}
+function onTitleInput(inp){const q=inp.value.trim();const ctx=getRowCtx(inp);if(!ctx.titleBox)return;if(q.length<2){ctx.titleBox.style.display='none';return;}const hits=courseDB.filter(c=>c.title.toLowerCase().includes(q.toLowerCase())).slice(0,20);renderCourseAC(ctx.titleBox,hits,ctx,inp);}
+function onCodeFocus(inp){if(inp.value.length>=2)onCodeInput(inp);}function onTitleFocus(inp){if(inp.value.length>=2)onTitleInput(inp);}
+function calculateTotal(){const isMobile=window.innerWidth<=767;const sel=isMobile?'.ccredit-m':'.ccredit';let total=0;document.querySelectorAll(sel).forEach(i=>{const v=parseFloat(i.value);if(!isNaN(v))total+=v;});document.getElementById('totalCredit').textContent=total.toFixed(2);return total;}
+function collectData(){const isMobile=window.innerWidth<=767;const courses=[];if(isMobile){document.querySelectorAll('#courseCards .course-card').forEach(card=>{const id=card.getAttribute('data-cid');const no=card.querySelector('.cno-m')?.value||'';const title=card.querySelector('.ctitle-m')?.value||'';const cr=card.querySelector('.ccredit-m')?.value||'';const row=document.querySelector(`tr[data-cid="${id}"]`);if(row){row.querySelector('.cno').value=no;row.querySelector('.ctitle').value=title;row.querySelector('.ccredit').value=cr;}courses.push({no,title,credit:cr});});}else{document.querySelectorAll('#courseRows tr').forEach(row=>{courses.push({no:row.querySelector('.cno')?.value||'',title:row.querySelector('.ctitle')?.value||'',credit:row.querySelector('.ccredit')?.value||''});});}return{department:document.getElementById('deptInput').value.trim(),roll:document.getElementById('rollInput').value.trim(),reg:document.getElementById('regInput').value.trim(),name:document.getElementById('nameInput').value.trim(),session:document.getElementById('sessionInput').value.trim(),prevCredit:document.getElementById('prevCreditInput').value.trim(),backlog:document.getElementById('backlogInput').value.trim(),courses};}
+function autoResizeTextarea(el){el.style.height='auto';el.style.height=Math.max(80,el.scrollHeight)+'px';}
+function formatBacklogDisplay(el){const raw=el.value;const items=raw.split(',').map(s=>s.trim()).filter(Boolean);if(!items.length)return;const WORDS_PER_LINE=12;const lines=[];let current=[];let wordCount=0;items.forEach(item=>{const w=item.split(/\s+/).length;if(wordCount+w>WORDS_PER_LINE&&current.length){lines.push(current.join(', '));current=[item];wordCount=w;}else{current.push(item);wordCount+=w;}});if(current.length)lines.push(current.join(', '));el.value=lines.join(',\n');autoResizeTextarea(el);}
+function buildPDF(forDownload){const{jsPDF}=window.jspdf;const d=collectData();const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'legal'});const PW=215.9,ML=20,MR=20;const CW=PW-ML-MR;const PAGE_H=355.6;const BOTTOM_MARGIN=20;const MAX_Y=PAGE_H-BOTTOM_MARGIN;let y=15;let pageNum=1;const sf=(style,size)=>{pdf.setFont('times',style);pdf.setFontSize(size);};function checkPage(h){if(y+h>MAX_Y){pdf.addPage('legal');pageNum++;y=15;}}y+=10;sf('normal',12);pdf.text("Heaven's Light is Our Guide",PW/2,y+6,{align:'center'});y+=9;sf('normal',15);pdf.text('RAJSHAHI UNIVERSITY OF ENGINEERING & TECHNOLOGY, BANGLADESH',PW/2,y+6,{align:'center'});y+=9;const ftX=52.5,ftW=111;sf('normal',18);pdf.text('Course Registration/Course Adjustment Form',ftX+ftW/2,y+6,{align:'center'});pdf.line(ftX-3,y+8.5,ftX+ftW+4,y+8.5);y+=9;sf('bold',20);pdf.text((d.department||'')+' Department',PW/2,y+9,{align:'center'});y+=12+6;sf('normal',13);pdf.text('Roll No.:',ML,y+4);pdf.text(d.roll,ML+37,y+4,{align:'center'});pdf.line(ML+17,y+5,ML+57,y+5);pdf.text('Registration No. with Session:',ML+58,y+4);pdf.text(d.reg,ML+62+53+(PW-MR-ML-58-53)/2,y+4,{align:'center'});pdf.line(ML+62+53,y+5,PW-MR,y+5);y+=5+3;pdf.text('Name:',ML,y+4);pdf.text(d.name,ML+14,y+4);pdf.line(ML+13,y+5,PW-MR,y+5);y+=5+3;pdf.text('Academic session with Semester:',ML,y+4);pdf.text(d.session,ML+62,y+4);pdf.line(ML+62,y+5,ML+114,y+5);pdf.text('Previously earned credit:',ML+114,y+4);pdf.text(d.prevCredit,ML+161,y+4);pdf.line(ML+161,y+5,PW-MR,y+5);y+=5+5;const bItems=d.backlog?d.backlog.split(',').map(s=>s.trim()).filter(Boolean):[];const lblW=35,valW=CW-lblW;sf('normal',13);const bLines=[];let curLine=[],curWords=0;bItems.forEach(item=>{const w=item.split(/\s+/).length;if(curWords+w>12&&curLine.length){bLines.push(curLine.join(', '));curLine=[item];curWords=w;}else{curLine.push(item);curWords+=w;}});if(curLine.length)bLines.push(curLine.join(', '));const lineCount=Math.max(1,bLines.length);const lineH=8;const cellPad=4;const cellH=Math.max(15,lineCount*lineH+cellPad);checkPage(cellH+3);pdf.rect(ML,y,lblW,cellH);pdf.text('Course No. of',ML+lblW/2,y+cellH*0.33,{align:'center'});pdf.text('Backlog Courses',ML+lblW/2,y+cellH*0.66,{align:'center'});pdf.rect(ML+lblW,y,valW,cellH);if(bLines.length===1){pdf.text(bLines[0],ML+lblW+valW/2,y+cellH/2+1.5,{align:'center'});}else if(bLines.length>1){const blockH=bLines.length*lineH;const startY=y+(cellH-blockH)/2+lineH*0.7;bLines.forEach((bl,i)=>{pdf.text(bl,ML+lblW+valW/2,startY+i*lineH,{align:'center'});});}y+=cellH+3;checkPage(8+8+3);sf('normal',13);pdf.text('Courses to be registered in this semester:',ML,y+4);y+=5+3;const cNo=35,cTi=116,cCr=25;function drawTableHeader(){pdf.rect(ML,y,cNo,8);pdf.text('Course No.',ML+cNo/2,y+5.5,{align:'center'});pdf.rect(ML+cNo,y,cTi,8);pdf.text('Course Title',ML+cNo+cTi/2,y+5.5,{align:'center'});pdf.rect(ML+cNo+cTi,y,cCr,8);pdf.text('Credit',ML+cNo+cTi+cCr/2,y+5.5,{align:'center'});y+=8;}drawTableHeader();const courseRows=[...d.courses];while(courseRows.length<10)courseRows.push({no:'',title:'',credit:''});let totalCredit=0;courseRows.forEach(c=>{const words=(c.title||'').split(' ').filter(Boolean);const wc=words.length;let rH=9,tLines=[c.title||''];if(wc>10){rH=19;tLines=[words.slice(0,5).join(' '),words.slice(5,10).join(' '),words.slice(10).join(' ')].filter(l=>l);}else if(wc>5){rH=13;tLines=[words.slice(0,5).join(' '),words.slice(5).join(' ')].filter(l=>l);}const cr=parseFloat(c.credit);if(!isNaN(cr))totalCredit+=cr;if(y+rH>MAX_Y){pdf.addPage('legal');pageNum++;y=15;sf('normal',13);drawTableHeader();}pdf.rect(ML,y,cNo,rH);pdf.text(c.no||'',ML+cNo/2,y+rH/2+1.5,{align:'center'});pdf.rect(ML+cNo,y,cTi,rH);if(tLines.length===1){pdf.text(tLines[0],ML+cNo+2,y+rH/2+1.5);}else{const lh=rH/tLines.length;tLines.forEach((tl,ti)=>pdf.text(tl,ML+cNo+2,y+lh*(ti+0.65)));}pdf.rect(ML+cNo+cTi,y,cCr,rH);pdf.text(c.credit||'',ML+cNo+cTi+cCr/2,y+rH/2+1.5,{align:'center'});y+=rH;});checkPage(9+8+60);pdf.rect(ML+cNo,y,cTi,9);pdf.text('Total Credit of this Semester',ML+cNo+cTi-2,y+6,{align:'right'});pdf.rect(ML+cNo+cTi,y,cCr,9);pdf.text(totalCredit.toFixed(2),ML+cNo+cTi+cCr/2,y+6,{align:'center'});y+=9+8;sf('normal',13);pdf.text("Adviser's Comment (if any)______________________________________________________",ML,y+7);y+=8;pdf.text('____________________________________________________________________________',ML,y+10);y+=14+10+4;checkPage(30);sf('normal',13);pdf.text('Signature of the Student',ML,y+4);pdf.line(ML,y+6,ML+44,y+6);pdf.text('Signature of the Adviser',ML+63,y+4);pdf.line(ML+63,y+6,ML+63+45,y+6);pdf.text('Signature of the Controller',PW-MR-49,y+4);pdf.line(PW-MR-49,y+6,PW-MR,y+6);y+=17;pdf.text('Date:',ML,y+4);y+=10;pdf.line(ML,y,ML+96,y);pdf.text('Students are asked to cross out the irrelevant Terms.',ML,y+5);if(forDownload){const safe=d.roll?d.roll.replace(/[^A-Za-z0-9_-]/g,'_'):Date.now();pdf.save(`RUET_Course_Registration_${safe}.pdf`);return null;}return pdf.output('bloburl');}
+function previewPDF(){try{const url=buildPDF(false);const isMobileUA=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);const isTouchTablet=navigator.maxTouchPoints>0&&window.innerWidth<=1024;if(isMobileUA||isTouchTablet)window.open(url,'_blank');else{const fr=document.getElementById('pdfFrame');fr.style.opacity='0.5';fr.src=url;fr.onload=()=>fr.style.opacity='1';}}catch(e){alert('PDF error: '+e.message);console.error(e);}}
+function downloadPDF(){try{buildPDF(true);}catch(e){alert('PDF error: '+e.message);console.error(e);}}
+document.addEventListener('click',e=>{if(!e.target.closest('.field-wrap')&&!e.target.closest('.ac-box'))hideAC();});
+document.addEventListener('focusout',e=>{if(e.target.matches('.cno,.ctitle,.cno-m,.ctitle-m')){setTimeout(()=>{const w=e.target.closest('.field-wrap');if(w){const b=w.querySelector('.ac-box');if(b){b.style.display='none';b.innerHTML='';}}}  ,160);}},true);
+document.addEventListener('keydown',e=>{if(!activeBox||activeBox.style.display!=='block')return;const items=Array.from(activeBox.querySelectorAll('.ac-item'));if(!items.length)return;let sel=items.findIndex(i=>i.classList.contains('selected'));if(e.key==='ArrowDown'){e.preventDefault();items.forEach(i=>i.classList.remove('selected'));const nx=(sel+1)%items.length;items[nx].classList.add('selected');items[nx].scrollIntoView({block:'nearest'});}else if(e.key==='ArrowUp'){e.preventDefault();items.forEach(i=>i.classList.remove('selected'));const pv=sel<=0?items.length-1:sel-1;items[pv].classList.add('selected');items[pv].scrollIntoView({block:'nearest'});}else if(e.key==='Enter'){e.preventDefault();if(sel>=0)items[sel].click();else if(items.length)items[0].click();}else if(e.key==='Escape'){hideAC();}});
+const CACHE_KEY='ruet-student-cache';
+function loadStudentCache(){try{const raw=localStorage.getItem(CACHE_KEY);return raw?JSON.parse(raw):[];}catch{return[];}}
+function saveStudentToCache(roll,reg,name){if(!roll&&!reg&&!name)return;let cache=loadStudentCache();cache=cache.filter(s=>s.roll!==roll&&s.reg!==reg);cache.unshift({roll,reg,name,ts:Date.now()});cache=cache.slice(0,10);localStorage.setItem(CACHE_KEY,JSON.stringify(cache));}
+function renderStudentCacheAC(triggerInput,field){const q=triggerInput.value.trim().toLowerCase();if(!q){hideStudentCacheAC();return;}const cache=loadStudentCache();const hits=cache.filter(s=>s[field]&&s[field].toLowerCase().includes(q));if(!hits.length){hideStudentCacheAC();return;}let box=document.getElementById('studentCacheBox');if(!box){box=document.createElement('div');box.id='studentCacheBox';box.className='ac-box';box.style.minWidth='260px';document.body.appendChild(box);box.style.position='fixed';box.style.zIndex='10002';}const r=triggerInput.getBoundingClientRect();box.style.top=r.bottom+'px';box.style.left=r.left+'px';box.style.width=Math.max(r.width,260)+'px';box.innerHTML='';hits.forEach(s=>{const el=document.createElement('div');el.className='ac-item';el.innerHTML=`<div class="ac-code">${s.roll||'—'}</div><div class="ac-sub">${s.name||''} &nbsp;·&nbsp; ${s.reg||''}</div>`;el.addEventListener('mousedown',e=>{e.preventDefault();if(s.roll)document.getElementById('rollInput').value=s.roll;if(s.reg)document.getElementById('regInput').value=s.reg;if(s.name)document.getElementById('nameInput').value=s.name;hideStudentCacheAC();});box.appendChild(el);});box.style.display='block';}
+function hideStudentCacheAC(){const box=document.getElementById('studentCacheBox');if(box){box.style.display='none';box.innerHTML='';}}
+function wireStudentCacheField(inputId,field){const inp=document.getElementById(inputId);if(!inp)return;inp.addEventListener('input',()=>renderStudentCacheAC(inp,field));inp.addEventListener('focus',()=>{if(inp.value.trim())renderStudentCacheAC(inp,field);});inp.addEventListener('blur',()=>setTimeout(hideStudentCacheAC,160));}
+const _origCollectData=collectData;
+function collectDataWithCache(){const d=_origCollectData();if(d.roll||d.reg||d.name){saveStudentToCache(d.roll,d.reg,d.name);}return d;}
+window._collectDataOrig=collectData;
+collectData=collectDataWithCache;
+addCourse();
+initData();
+wireStudentCacheField('rollInput','roll');
+wireStudentCacheField('regInput','reg');
+wireStudentCacheField('nameInput','name');
+document.addEventListener('click',e=>{if(!e.target.closest('#studentCacheBox')&&!['rollInput','regInput','nameInput'].includes(e.target.id)){hideStudentCacheAC();}});
+</script>
+</body>
+</html>

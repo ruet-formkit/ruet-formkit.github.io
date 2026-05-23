@@ -1,0 +1,88 @@
+<!-- =====================================================
+     RUET FormKit — Shared Footer
+     ===================================================== -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+
+      <!-- Brand & Description -->
+      <div class="footer-col footer-about">
+        <div class="footer-brand">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <rect width="28" height="28" rx="8" fill="url(#footBrandGrad)"/>
+            <path d="M7 8h14M7 14h10M7 20h12" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="footBrandGrad" x1="0" y1="0" x2="28" y2="28">
+                <stop offset="0%" stop-color="#4f8ef7"/>
+                <stop offset="100%" stop-color="#7c3aed"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>RUET <em>FormKit</em></span>
+        </div>
+        <p class="footer-desc">
+          A free, open academic tools portal built exclusively for students of Rajshahi University of Engineering &amp; Technology. Generate official forms, calculate CGPA, and manage academic paperwork — all in one place, with no sign-up required.
+        </p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-col">
+        <h4 class="footer-heading">Tools</h4>
+        <ul class="footer-links">
+          <li><a href="course-registration.html">Course Registration Form</a></li>
+          <li><a href="form-fillup.html">Exam Application Form</a></li>
+          <li><a href="cgpa-calculator.html">CGPA Calculator</a></li>
+        </ul>
+      </div>
+
+      <!-- Developer Contact -->
+      <div class="footer-col">
+        <h4 class="footer-heading">Developer</h4>
+        <div class="dev-card">
+          <div aria-hidden="true">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <circle cx="18" cy="18" r="18" fill="url(#devGrad)"/>
+              <circle cx="18" cy="15" r="6" fill="#fff" fill-opacity=".85"/>
+              <ellipse cx="18" cy="29" rx="10" ry="7" fill="#fff" fill-opacity=".5"/>
+              <defs>
+                <linearGradient id="devGrad" x1="0" y1="0" x2="36" y2="36">
+                  <stop offset="0%" stop-color="#4f8ef7"/>
+                  <stop offset="100%" stop-color="#7c3aed"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="dev-info">
+            <span class="dev-name"><a href="https://anantoislamsiyam.great-site.net" target="_blank" style="text-decoration:none; color:inherit;">Md. Ananto Islam Siyam</a></span>
+            <span class="dev-role">Mechanical Engineering · 23 Series</span>
+            <span class="dev-role">Rajshahi University of Engineering &amp; Technology</span>
+          </div>
+        </div>
+        <div class="dev-contacts">
+          <a href="https://www.linkedin.com/in/ananto-islam-siyam" target="_blank" rel="noopener noreferrer" class="contact-link contact-linkedin">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn
+          </a>
+          <a href="mailto:anantoislamsiyam@gmail.com" class="contact-link contact-email">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            anantoislamsiyam@gmail.com
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /footer-grid -->
+
+    <div class="footer-bottom">
+      <p>&copy; <span id="footerYear"></span> RUET FormKit. All rights reserved.</p>
+      <p class="footer-disclaimer">This is an unofficial website not affiliated with RUET administration.</p>
+    </div>
+
+  </div>
+</footer>
+
+<script>
+(function() {
+  var el = document.getElementById('footerYear');
+  if (el) el.textContent = new Date().getFullYear();
+})();
+</script>

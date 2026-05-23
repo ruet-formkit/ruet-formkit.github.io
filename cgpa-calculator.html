@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<title>CGPA Calculator — RUET FormKit</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script>
+(function(){
+  const saved = localStorage.getItem('ruetFormkit_theme');
+  const dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+})();
+</script>
+<link rel="stylesheet" href="layout.css">
+<style>
+/* extra padding for fixed header */
+body { padding-top: calc(68px + 24px) !important; padding-bottom: 0 !important; }
+/* Neutralise body's 20px side padding so footer spans full viewport width */
+.site-footer { margin-left: -20px; margin-right: -20px; }
+@media (max-width: 768px) { .site-footer { margin-left: -12px; margin-right: -12px; } }
+/* cgpa page inner header */
+.cgpa-page-header {
+  text-align:center;
+  padding:8px 20px 4px;
+}
+/* Fix toast so it doesn't sit under fixed header */
+#toast-container { top: calc(68px + 20px) !important; }
+/* Dark mode overrides for this page */
+[data-theme="dark"] {
+  --bg: #0d1117;
+  --surface: #0f172a;
+  --surface2: #1e293b;
+  --b50: #0f1e3a; --b100: #1e3a6a; --b200: rgba(147,184,253,0.2);
+  --b300: rgba(147,184,253,0.3); --b400: #6090f8;
+  --b500: #3d6ef0; --b600: #2751dc; --b700: #a5b4fc;
+  --navy: #bfdbfe;
+  --text: #e2e8f0; --tmid: #94a3b8; --tlight: #64748b;
+  --border: rgba(147,184,253,0.15); --border2: rgba(255,255,255,0.08);
+  --shadow: 0 8px 40px rgba(0,0,0,.4);
+}
+[data-theme="dark"] body {
+  background: linear-gradient(160deg, #0d1117 0%, #0a1628 50%, #0d1117 100%) !important;
+  background-attachment: fixed !important;
+}
+[data-theme="dark"] .card,
+[data-theme="dark"] .quick-load,
+[data-theme="dark"] .results-bar,
+[data-theme="dark"] .tab-content-panel {
+  background: #0f172a !important;
+  border-color: rgba(147,184,253,0.12) !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .portal-drop { background: #0f172a; border-color: rgba(147,184,253,0.2); }
+[data-theme="dark"] .pd-opt { color: #e2e8f0; }
+[data-theme="dark"] .pd-opt:hover, [data-theme="dark"] .pd-opt.focused { background: rgba(147,184,253,0.07); }
+[data-theme="dark"] .pd-opt-main { color: #e2e8f0 !important; }
+[data-theme="dark"] .pd-opt-sub { color: #93c5fd !important; }
+[data-theme="dark"] .pd-search-wrap { background: #0f172a; }
+[data-theme="dark"] .pd-search { background: #1e293b; color: #e2e8f0; border-color: rgba(147,184,253,0.2); }
+[data-theme="dark"] .tab-btn { color: #94a3b8; }
+[data-theme="dark"] .tab-btn.active { color: #60a5fa; border-color: #60a5fa; background: rgba(96,165,250,0.08); }
+[data-theme="dark"] input, [data-theme="dark"] select { background: #1e293b !important; color: #e2e8f0 !important; border-color: rgba(147,184,253,0.2) !important; }
+[data-theme="dark"] .grade-select { background: #1e293b; color: #e2e8f0; }
+[data-theme="dark"] table th { background: #1e293b !important; color: #94a3b8 !important; }
+[data-theme="dark"] table td { border-color: rgba(255,255,255,0.06) !important; }
+[data-theme="dark"] .toast { background: #0f172a; color: #e2e8f0; }
+/* Modal dark mode */
+[data-theme="dark"] .modal-box { background: #0f172a; border-color: rgba(147,184,253,0.15); }
+[data-theme="dark"] .modal-header { background: #0f172a !important; border-color: rgba(147,184,253,0.12); }
+[data-theme="dark"] .modal-title { color: #e2e8f0; }
+[data-theme="dark"] .modal-title-icon { background: #1e293b; }
+[data-theme="dark"] .modal-close { background: #1e293b; border-color: rgba(255,255,255,0.1); color: #94a3b8; }
+[data-theme="dark"] .modal-body { background: #0f172a; }
+[data-theme="dark"] .info-section { border-color: rgba(147,184,253,0.1); }
+[data-theme="dark"] .info-section p { color: #94a3b8; }
+[data-theme="dark"] .info-section-title { color: #60a5fa; }
+[data-theme="dark"] .info-section-title::after { background: rgba(147,184,253,0.15); }
+[data-theme="dark"] .info-steps li { background: #1e293b; border-color: rgba(147,184,253,0.12); }
+[data-theme="dark"] .step-title { color: #e2e8f0; }
+[data-theme="dark"] .step-desc { color: #94a3b8; }
+[data-theme="dark"] .feature-item { background: #1e293b; border-color: rgba(147,184,253,0.12); }
+[data-theme="dark"] .fi-text strong { color: #e2e8f0; }
+[data-theme="dark"] .fi-text span { color: #94a3b8; }
+[data-theme="dark"] .dev-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important; border-color: rgba(147,184,253,0.15) !important; }
+
+/* Grading scale */
+[data-theme="dark"] .grade-ref { background: #1e293b; border-color: rgba(147,184,253,0.12); }
+[data-theme="dark"] .gc { background: #0f172a; color: #94a3b8; border-color: rgba(147,184,253,0.15); }
+[data-theme="dark"] .gc strong { color: #93c5fd; }
+/* Mode toggle (Marks / Letter Grade) */
+[data-theme="dark"] .mode-toggle { background: #1e293b; border-color: rgba(147,184,253,0.12); }
+[data-theme="dark"] .mode-btn { color: #94a3b8; }
+[data-theme="dark"] .mode-btn.active { background: var(--b500); color: #fff; }
+/* Prev toggle (By Semester / Overall CGPA) */
+[data-theme="dark"] .prev-toggle { background: #1e293b; border-color: rgba(147,184,253,0.12); }
+[data-theme="dark"] .ptb { color: #94a3b8; }
+[data-theme="dark"] .ptb.active { background: #0f172a; color: #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+/* Mobile course card */
+[data-theme="dark"] .cr-card { background: #1e293b !important; border-color: rgba(147,184,253,0.15) !important; }
+[data-theme="dark"] .cr-card-header { border-color: rgba(147,184,253,0.12) !important; }
+[data-theme="dark"] .cr-card-label { color: #93c5fd !important; }
+[data-theme="dark"] .cr-card-field label { color: #64748b !important; }
+/* Info pill dark mode */
+[data-theme="dark"] .info-pill { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12); color: #e2e8f0; }
+[data-theme="dark"] .info-pill:hover { background: rgba(255,255,255,0.12); }
+</style>
+<style>
+:root{
+  --bg:#eef3ff;--surface:#fff;--surface2:#f5f8ff;
+  --b50:#eff4ff;--b100:#dbe8ff;--b200:#bdd3fe;--b300:#93b8fd;
+  --b400:#6090f8;--b500:#3d6ef0;--b600:#2751dc;--b700:#1e3fc2;
+  --navy:#0f1e4a;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;
+  --text:#111827;--tmid:#4b5563;--tlight:#9ca3af;
+  --border:#dbeafe;--border2:#e5e7eb;
+  --r:16px;--rsm:10px;--shadow:0 8px 40px rgba(37,99,235,.13);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Sora',sans-serif;
+  background: #e8f0ff;
+  background-attachment: fixed;
+  color:var(--text);
+  min-height:100vh;padding:36px 20px 40px;
+}
+
+/* ── Toast ──────────────────────────────────────── */
+#toast-container{
+  position:fixed;top:24px;left:50%;transform:translateX(-50%);
+  z-index:2147483647;display:flex;flex-direction:column;gap:10px;
+  pointer-events:none;align-items:center;
+}
+.toast{
+  display:flex;align-items:flex-start;gap:12px;padding:14px 20px;
+  border-radius:14px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.18);
+  border-left:4px solid var(--b500);font-size:13.5px;font-weight:500;color:var(--text);
+  min-width:280px;max-width:460px;pointer-events:all;
+  animation:toastIn .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+.toast.warn{border-color:var(--warn);}
+.toast.err{border-color:var(--danger);}
+.toast.ok{border-color:var(--success);}
+.toast-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.toast-body{flex:1;}
+.toast-title{font-weight:700;margin-bottom:2px;}
+.toast-msg{color:var(--tmid);font-size:12.5px;line-height:1.5;}
+.toast-close{background:none;border:none;cursor:pointer;color:var(--tlight);font-size:16px;pointer-events:all;padding:0 0 0 4px;align-self:flex-start;}
+@keyframes toastIn{from{opacity:0;transform:translateY(-12px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.96)}}
+
+/* ── Portal dropdown layer ──────────────────────── */
+#drop-portal{
+  position:fixed;z-index:2147483646;pointer-events:none;top:0;left:0;width:0;height:0;
+}
+.portal-drop{
+  position:fixed;pointer-events:all;
+  background:#fff;border:1.5px solid var(--b200);
+  border-radius:14px;overflow:hidden;
+  box-shadow:0 16px 48px rgba(37,99,235,.20),0 4px 16px rgba(0,0,0,.10);
+  max-height:260px;overflow-y:auto;
+  display:none;min-width:180px;
+}
+.portal-drop.open{display:block;}
+.portal-drop::-webkit-scrollbar{width:5px;}
+.portal-drop::-webkit-scrollbar-track{background:var(--b50);}
+.portal-drop::-webkit-scrollbar-thumb{background:var(--b200);border-radius:4px;}
+.pd-opt{
+  padding:9px 14px;cursor:pointer;
+  border-bottom:1px solid var(--b50);
+  display:flex;flex-direction:column;gap:2px;
+  transition:background .12s;
+}
+.pd-opt:last-child{border-bottom:none;}
+.pd-opt:hover,.pd-opt.focused{background:var(--b50);}
+.pd-opt-main{font-size:13px;font-weight:500;color:var(--text);}
+.pd-opt-sub{font-size:11px;color:var(--b400);font-weight:400;}
+.pd-opt-no{padding:12px 14px;font-size:12.5px;color:var(--tlight);text-align:center;}
+.pd-search-wrap{
+  padding:8px 10px;border-bottom:1.5px solid var(--b100);
+  position:sticky;top:0;background:#fff;z-index:1;
+}
+.pd-search{
+  width:100%;padding:7px 10px;border:1.5px solid var(--b200);border-radius:8px;
+  font-family:'Sora',sans-serif;font-size:12.5px;color:var(--text);
+  background:var(--b50);outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.pd-search:focus{border-color:var(--b500);box-shadow:0 0 0 3px rgba(61,110,240,.12);background:#fff;}
+
+/* ── Combo trigger button ───────────────────────── */
+.combo-wrap{position:relative;}
+.combo-input{
+  width:100%;padding:10px 34px 10px 12px;
+  border:1.5px solid var(--border2);border-radius:var(--rsm);
+  font-family:'Sora',sans-serif;font-size:13px;color:var(--text);
+  background:var(--surface2);outline:none;
+  transition:border-color .2s,box-shadow .2s,background .2s;
+  cursor:text;
+}
+.combo-input:focus{border-color:var(--b400);box-shadow:0 0 0 3px rgba(61,110,240,.10);background:#fff;}
+.combo-input::placeholder{color:var(--tlight);}
+.combo-arrow{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  pointer-events:none;color:var(--b400);font-size:11px;
+  transition:transform .2s;
+}
+.combo-wrap.open .combo-arrow{transform:translateY(-50%) rotate(180deg);}
+
+/* ── Quick-load bar ─────────────────────────────── */
+.quick-load{
+  background:var(--b50);border:1px solid var(--b100);border-radius:var(--rsm);
+  padding:16px 18px;margin-bottom:22px;
+  display:flex;flex-wrap:nowrap;gap:12px;align-items:flex-end;
+}
+.ql-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;}
+.ql-group label{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--b600);}
+.btn-load{
+  padding:9px 22px;background:var(--b500);color:#fff;border:none;
+  border-radius:var(--rsm);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s;white-space:nowrap;align-self:flex-end;flex-shrink:0;
+}
+.btn-load:hover{background:var(--b600);transform:translateY(-1px);}
+
+/* ── Grade ref ──────────────────────────────────── */
+.grade-ref{
+  display:flex;flex-wrap:wrap;gap:5px;padding:12px 14px;
+  background:var(--b50);border:1px solid var(--b100);border-radius:var(--rsm);margin-bottom:18px;
+}
+.gc{font-size:11px;font-weight:500;padding:3px 9px;border-radius:100px;background:#fff;color:var(--tmid);border:1px solid var(--b100);white-space:nowrap;}
+.gc strong{color:var(--b600);}
+
+/* ── Header ─────────────────────────────────────── */
+.cgpa-page-header{text-align:center;margin-bottom:32px;margin-top:0;animation:fadeDown .7s ease both;}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;background:var(--b100);color:var(--b700);
+  font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  padding:5px 14px;border-radius:100px;margin-bottom:14px;border:1px solid var(--b200);
+}
+.cgpa-page-header h1{font-family:'Lora',serif;font-size:clamp(2rem,4vw,3rem);font-weight:700;color:var(--navy);line-height:1.15;margin-bottom:8px;}
+.cgpa-page-header h1 span{color:var(--b500);}
+.cgpa-page-header p{color:var(--tmid);font-size:14.5px;}
+
+/* ── Instructions Button (inline in header) ─────────────── */
+.top-controls{
+  display:flex;justify-content:center;margin-bottom:8px;
+}
+.info-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--surface);
+  color:var(--text);
+  border:1px solid var(--border2);
+  border-radius:25px;
+  padding:8px 20px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  cursor:pointer;
+  transition:all .22s;
+  font-family:'Sora',sans-serif;
+  font-size:13px;font-weight:600;
+  letter-spacing:.3px;
+  user-select:none;
+  text-decoration:none;
+}
+.info-pill:hover{
+  background:var(--b50);
+  box-shadow:0 4px 16px rgba(61,110,240,.18);
+  transform:translateY(-1px);
+}
+[data-theme="dark"] .info-pill {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.12);
+  color: #e2e8f0;
+}
+[data-theme="dark"] .info-pill:hover {
+  background: rgba(255,255,255,0.12);
+}
+.info-pill-icon{
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  flex-shrink:0;
+}
+
+/* ── Info Modal ─────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(15,30,74,.45);
+  backdrop-filter:blur(6px);
+  z-index:99999;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-box{
+  background:#fff;border-radius:20px;
+  width:100%;max-width:640px;
+  max-height:72vh;
+  overflow-y:auto;
+  scrollbar-gutter:stable;
+  box-shadow:0 32px 80px rgba(15,30,74,.28);
+  border:1.5px solid var(--b200);
+  transform:translateY(24px) scale(.97);
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1),opacity .25s;
+  opacity:0;
+}
+.modal-overlay.open .modal-box{
+  transform:none;
+  opacity:1;
+}
+.modal-box::-webkit-scrollbar{width:5px;}
+.modal-box::-webkit-scrollbar-thumb{background:var(--b200);border-radius:4px;}
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 26px 18px;
+  border-bottom:1px solid var(--b100);
+  position:sticky;top:0;background:#fff;z-index:2;
+  border-radius:20px 20px 0 0;
+  margin-right:0;
+}
+.modal-title{
+  font-family:'Lora',serif;font-size:1.25rem;font-weight:700;color:var(--navy);
+  display:flex;align-items:center;gap:10px;
+}
+.modal-title-icon{
+  width:38px;height:38px;border-radius:10px;background:var(--b100);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.modal-close{
+  width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border2);
+  background:var(--surface2);color:var(--tmid);font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .18s;flex-shrink:0;
+}
+.modal-close:hover{background:var(--danger);color:#fff;border-color:var(--danger);}
+.modal-body{padding:26px;}
+.info-section{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--b50);}
+.info-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.info-section-title{
+  font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--b500);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.info-section-title::after{content:'';flex:1;height:1px;background:var(--b100);}
+.info-section p{font-size:13.5px;color:var(--tmid);line-height:1.7;}
+.info-steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px;}
+.info-steps li{
+  display:flex;gap:12px;align-items:flex-start;
+  background:var(--b50);border-radius:10px;padding:12px 14px;
+  border:1px solid var(--b100);
+}
+.step-num{
+  width:24px;height:24px;border-radius:50%;
+  background:var(--b500);color:#fff;
+  font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.step-body{flex:1;}
+.step-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;}
+.step-desc{font-size:12px;color:var(--tmid);line-height:1.5;}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.feature-item{
+  background:var(--b50);border:1px solid var(--b100);border-radius:10px;
+  padding:12px 14px;display:flex;align-items:flex-start;gap:9px;
+}
+.fi-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.fi-text strong{font-size:12.5px;color:var(--navy);display:block;margin-bottom:2px;}
+.fi-text span{font-size:11.5px;color:var(--tmid);}
+.dev-card{
+  background:#1B2953;
+  border:1.5px solid rgba(147,184,253,0.2);border-radius:12px;
+  padding:16px 18px;
+  display:flex;align-items:center;gap:14px;
+}
+.dev-avatar{
+  width:48px;height:48px;border-radius:12px;
+  background:linear-gradient(135deg,var(--b500),var(--b700));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:#fff;flex-shrink:0;
+}
+.dev-info strong{font-size:14px;color:#e2e8f0;display:block;margin-bottom:2px;}
+.dev-info span{font-size:12px;color:#94a3b8;}
+
+
+/* ── Cards / Layout ─────────────────────────────── */
+.wrap{max-width:1100px;margin:0 auto 48px;display:flex;flex-direction:column;gap:28px;}
+.card{background:var(--surface);border-radius:var(--r);padding:30px 32px;box-shadow:var(--shadow);border:1px solid var(--border);animation:fadeUp .6s ease both;}
+.card:nth-child(2){animation-delay:.08s;}.card:nth-child(3){animation-delay:.16s;}
+.card-head{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+.card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ci-blue{background:var(--b100);}.ci-cyan{background:#e0f9ff;}.ci-indigo{background:#ede9fe;}
+.card-head-text h2{font-family:'Lora',serif;font-size:1.3rem;font-weight:600;color:var(--navy);}
+.card-head-text p{font-size:12.5px;color:var(--tlight);margin-top:2px;}
+.sec-label{font-size:10.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--b500);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--b100);}
+
+/* ── Mode toggle ────────────────────────────────── */
+.mode-toggle{display:flex;gap:8px;background:var(--b50);border:1px solid var(--b100);border-radius:var(--rsm);padding:5px;margin-bottom:18px;width:fit-content;}
+.mode-btn{padding:7px 18px;border:none;border-radius:7px;font-family:'Sora',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;background:transparent;color:var(--tmid);transition:all .2s;}
+.mode-btn.active{background:var(--b500);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(61,110,240,.3);}
+
+/* ── Column headers ─────────────────────────────── */
+.col-heads{display:grid;gap:10px;margin-bottom:8px;grid-template-columns:2.5fr 1.6fr 1fr 0.8fr 36px;}
+.ch{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--tlight);padding:0 4px;}
+
+/* ── Course rows (desktop) ──────────────────────── */
+#course-list{display:flex;flex-direction:column;gap:10px;}
+.cr{display:grid;gap:10px;align-items:start;grid-template-columns:2.5fr 1.6fr 1fr 0.8fr 36px;animation:fadeUp .3s ease both;}
+.cr input[type=number]{
+  width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--rsm);
+  font-family:'Sora',sans-serif;font-size:13px;color:var(--text);
+  background:var(--surface2);outline:none;transition:border-color .2s,box-shadow .2s,background .2s;
+}
+.cr input[type=number]:focus{border-color:var(--b400);box-shadow:0 0 0 3px rgba(61,110,240,.10);background:#fff;}
+.btn-rm{width:34px;height:34px;border-radius:8px;border:1.5px solid #fee2e2;background:#fff5f5;color:#ef4444;font-size:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.btn-rm:hover{background:#fee2e2;border-color:#fca5a5;}
+.btn-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;padding:10px;border:2px dashed var(--b300);border-radius:var(--rsm);background:transparent;color:var(--b500);font-family:'Sora',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-add:hover{background:var(--b50);border-color:var(--b500);}
+.btn-calc{width:100%;margin-top:20px;padding:14px;border:none;border-radius:var(--rsm);background:linear-gradient(135deg,var(--b500) 0%,var(--b700) 100%);color:#fff;font-family:'Sora',sans-serif;font-size:14.5px;font-weight:600;cursor:pointer;letter-spacing:.4px;transition:all .25s;box-shadow:0 4px 18px rgba(37,99,235,.35);}
+.btn-calc:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(37,99,235,.4);}
+.btn-calc:active{transform:translateY(0);}
+
+/* ── SGPA strip ─────────────────────────────────── */
+.sgpa-strip{margin-top:20px;padding:18px 22px;background:linear-gradient(135deg,#e8f0fe 0%,#dbeafe 100%);border-radius:var(--rsm);border:1px solid var(--b200);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.sgpa-strip .sl{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--b500);}
+.sgpa-strip .sv{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;color:var(--navy);line-height:1;}
+.sgpa-strip .sb{font-size:12px;color:var(--tmid);margin-top:3px;}
+.lpill{padding:6px 18px;border-radius:100px;color:#fff;font-size:14px;font-weight:700;}
+.lAp{background:#059669;}.lA{background:#0d9488;}.lAm{background:#0891b2;}
+.lBp{background:var(--b500);}.lB{background:#4f46e5;}.lBm{background:#7c3aed;}
+.lCp{background:#9333ea;}.lC{background:#c026d3;}
+.lD{background:var(--warn);}.lF{background:var(--danger);}
+
+/* ── Previous section ───────────────────────────── */
+.prev-toggle{display:flex;gap:8px;padding:5px;background:var(--b50);border:1px solid var(--b100);border-radius:var(--rsm);margin-bottom:16px;}
+.ptb{flex:1;padding:9px;border:none;border-radius:7px;font-family:'Sora',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;background:transparent;color:var(--tmid);transition:all .2s;}
+.ptb.active{background:#fff;color:var(--navy);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+#sem-list{display:flex;flex-direction:column;gap:10px;}
+.sem-heads{display:grid;grid-template-columns:0.8fr 1.8fr 34px;gap:10px;margin-bottom:8px;padding:0 4px;}
+.sem-row{display:grid;grid-template-columns:0.8fr 1.8fr 34px;gap:10px;align-items:center;animation:fadeUp .3s ease both;}
+.sem-row input{padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--rsm);font-family:'Sora',sans-serif;font-size:13px;color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s,box-shadow .2s;}
+.sem-row input:focus{border-color:var(--b400);box-shadow:0 0 0 3px rgba(61,110,240,.10);background:#fff;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.inp-group{display:flex;flex-direction:column;gap:5px;}
+.inp-group label{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--tmid);}
+.inp-group input{padding:11px 14px;border:1.5px solid var(--border2);border-radius:var(--rsm);font-family:'Sora',sans-serif;font-size:14px;color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s,box-shadow .2s;}
+.inp-group input:focus{border-color:var(--b400);box-shadow:0 0 0 3px rgba(61,110,240,.10);background:#fff;}
+
+/* ── CGPA hero ──────────────────────────────────── */
+.cgpa-hero{background:linear-gradient(135deg,var(--navy) 0%,#1a3a7a 50%,#0e2f6e 100%);border-radius:var(--r);padding:36px 28px 28px;color:#fff;position:relative;overflow:hidden;}
+.cgpa-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(96,144,248,.25) 0%,transparent 70%);}
+.ring-area{display:flex;justify-content:center;margin-bottom:20px;position:relative;z-index:2;}
+.ring-svg{transform:rotate(-90deg);filter:drop-shadow(0 4px 12px rgba(96,144,248,.5));}
+.ring-bg-c{fill:none;stroke:rgba(255,255,255,.1);stroke-width:7;}
+.ring-prog{fill:none;stroke:url(#ringGrad);stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.4,0,.2,1);}
+.ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:3;}
+.rc-lbl{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);}
+.rc-val{font-family:'Lora',serif;font-size:3rem;font-weight:700;line-height:1.1;}
+.cgpa-gpill{display:flex;justify-content:center;padding:5px 20px;border-radius:100px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);font-size:13px;font-weight:600;letter-spacing:.5px;width:fit-content;margin:0 auto 20px;}
+.cgpa-stats{display:flex;justify-content:space-around;padding-top:20px;border-top:1px solid rgba(255,255,255,.1);position:relative;z-index:2;flex-wrap:wrap;gap:12px;}
+.cstat{text-align:center;}
+.cstat .cv{font-size:1.25rem;font-weight:700;font-family:'Lora',serif;}
+.cstat .ck{font-size:10.5px;color:rgba(255,255,255,.45);margin-top:3px;letter-spacing:.5px;}
+.hidden{display:none !important;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+
+/* ═══════════ MOBILE RESPONSIVE ═══════════════════ */
+@media(max-width:768px){
+  body{padding:24px 12px 40px;}
+
+  header{margin-bottom:28px;}
+  header h1{font-size:1.75rem;}
+  header p{font-size:13px;}
+
+  .wrap{gap:18px;}
+  .card{padding:20px 16px;border-radius:14px;}
+  .card-head{gap:10px;margin-bottom:18px;}
+  .card-icon{width:38px;height:38px;font-size:17px;border-radius:10px;}
+  .card-head-text h2{font-size:1.1rem;}
+
+  /* Quick-load: stack vertically on mobile */
+  .quick-load{flex-wrap:wrap;padding:14px 14px;}
+  .ql-group{min-width:calc(50% - 6px);}
+  .btn-load{width:100%;justify-content:center;margin-top:4px;}
+
+  /* Grade ref wrap */
+  .grade-ref{padding:10px 12px;gap:4px;}
+  .gc{font-size:10.5px;padding:3px 7px;}
+
+  /* Mode toggle full width */
+  .mode-toggle{width:100%;}
+  .mode-btn{flex:1;text-align:center;padding:8px 10px;font-size:12px;}
+
+  /* Hide desktop column headers, show mobile cards instead */
+  .col-heads{display:none;}
+  .courses-desktop{display:none;}
+  .courses-mobile{display:flex !important;flex-direction:column;gap:14px;}
+
+  /* Course card (mobile) */
+  .cr-card{
+    background:var(--b50);border:1.5px solid var(--b100);border-radius:12px;
+    padding:14px;animation:fadeUp .3s ease both;
+  }
+  .cr-card-header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:12px;padding-bottom:10px;
+    border-bottom:1px solid var(--b200);
+  }
+  .cr-card-num{
+    width:28px;height:28px;border-radius:50%;
+    background:var(--b500);color:#fff;
+    font-size:12px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .cr-card-label{font-size:12px;font-weight:600;color:var(--b600);letter-spacing:.5px;}
+  .cr-card-fields{display:flex;flex-direction:column;gap:10px;}
+  .cr-card-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .cr-card-field label{
+    font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    color:var(--tlight);display:block;margin-bottom:4px;
+  }
+  .cr-card-field input[type=number],
+  .cr-card-field .combo-wrap .combo-input{
+    width:100%;padding:9px 10px;font-size:13px;
+    border:1.5px solid var(--border2);border-radius:8px;
+    font-family:'Sora',sans-serif;color:var(--text);
+    background:var(--surface);outline:none;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .cr-card-field input[type=number]:focus,
+  .cr-card-field .combo-wrap .combo-input:focus{
+    border-color:var(--b400);box-shadow:0 0 0 3px rgba(61,110,240,.10);background:#fff;
+  }
+
+  /* Semester rows */
+  .sem-row{grid-template-columns:120px 1.8fr 34px;}
+  .sem-row input{font-size:12px;padding:9px 10px;}
+  .sem-heads{grid-template-columns:0.8fr 1fr 34px;}
+
+  /* Two col becomes single col */
+  .two-col{grid-template-columns:1fr;}
+
+  /* SGPA strip */
+  .sgpa-strip{padding:14px 16px;}
+  .sgpa-strip .sv{font-size:2rem;}
+
+  /* CGPA hero */
+  .cgpa-hero{padding:24px 18px 20px;}
+  .rc-val{font-size:2.4rem;}
+
+  /* Modal */
+  .modal-overlay{align-items:center;padding:16px;}
+  .modal-box{max-height:72vh;border-radius:20px;margin:0;}
+  .modal-header{padding:18px 18px 14px;border-radius:20px 20px 0 0;}
+  .modal-body{padding:18px;}
+
+  .feature-grid{grid-template-columns:1fr;}
+  .modal-title{font-size:1.1rem;}
+  .modal-title-icon{width:32px;height:32px;font-size:15px;}
+
+  /* btn-add full width */
+  .btn-add{font-size:13px;}
+  .btn-calc{font-size:14px;padding:13px;}
+}
+
+@media(max-width:480px){
+  .quick-load{flex-direction:column;}
+  .ql-group{min-width:100%;}
+  .cr-card-row{grid-template-columns:1fr;}
+  .dev-card{flex-direction:column;align-items:flex-start;gap:10px;}
+  .info-pill{padding:8px 16px;}
+  .info-pill-icon{width:28px;height:28px;font-size:15px;}
+}
+
+/* Keep desktop layout intact above 768px */
+@media(min-width:769px){
+  .courses-mobile{display:none !important;}
+  .courses-desktop{display:block;}
+  .cr{display:grid;}
+}
+</style>
+</head>
+<body>
+
+<!-- Shared Header -->
+<div id="fk-header"></div>
+
+
+<!-- Info Button + Page Inner Header -->
+<div class="cgpa-page-header">
+  <div><img src="c-logo.png" alt="RUET Logo" style="width:110px;margin-bottom:16px;" onerror="this.style.display='none'"></div>
+  <h1>CGPA <span>Calculator</span></h1>
+  <p>Department-aware · Marks or Grade · Cumulative GPA</p>
+  <div class="top-controls" style="margin-top:16px;">
+    <div class="info-pill" onclick="openInfoModal()">
+      <div class="info-pill-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <span class="info-pill-text">Instructions</span>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+<div id="drop-portal"></div>
+
+<!-- Info Modal -->
+<div class="modal-overlay" id="infoModal" onclick="handleModalOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">
+        <div class="modal-title-icon">📊</div>
+        About This Tool
+      </div>
+      <button class="modal-close" onclick="closeInfoModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="info-section">
+        <div class="info-section-title">📖 How to Use</div>
+        <ol class="info-steps">
+          <li>
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">Select Department &amp; Semester</div>
+              <div class="step-desc">In the Auto-load bar at the top of the Current Semester card, choose your department and semester from the dropdowns, then click <strong>⚡ Load Courses</strong> to populate the course list automatically.</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">Choose Input Mode</div>
+              <div class="step-desc">Switch between <strong>Marks (%)</strong> and <strong>Letter Grade</strong> mode using the toggle. In Marks mode enter your percentage (0–100); in Grade mode pick a letter grade from the dropdown.</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">Add / Edit Courses Manually</div>
+              <div class="step-desc">Click <strong>＋ Add Course</strong> to insert a new row. Search by course name or code using the combo inputs. Credits are filled automatically when a course is selected.</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">Calculate SGPA</div>
+              <div class="step-desc">Click <strong>Calculate SGPA →</strong> to see your Semester GPA instantly. The result and letter grade appear in the result strip below.</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <div class="step-title">Calculate CGPA</div>
+              <div class="step-desc">In the CGPA Calculator card, either enter individual semester SGPAs using <em>By Semester SGPA</em> mode, or enter your previous CGPA &amp; total credits using <em>Overall CGPA + Credits</em> mode. The current SGPA (if calculated) is included automatically.</div>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <div class="step-title">View CGPA Result</div>
+              <div class="step-desc">Your final CGPA with the animated ring visual, letter grade, total credits, and semester breakdown appears in the result card.</div>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="info-section">
+        <div class="info-section-title">✨ Features</div>
+        <div class="feature-grid">
+          <div class="feature-item">
+            <div class="fi-icon">⚡</div>
+            <div class="fi-text"><strong>Auto-load Courses</strong><span>Select dept &amp; semester → load all courses instantly</span></div>
+          </div>
+          <div class="feature-item">
+            <div class="fi-icon">🔢</div>
+            <div class="fi-text"><strong>Marks &amp; Grade Mode</strong><span>Enter percentage or pick letter grade</span></div>
+          </div>
+          <div class="feature-item">
+            <div class="fi-icon">🔍</div>
+            <div class="fi-text"><strong>Smart Search</strong><span>Autocomplete by course name or code</span></div>
+          </div>
+          <div class="feature-item">
+            <div class="fi-icon">🎯</div>
+            <div class="fi-text"><strong>Two CGPA Methods</strong><span>Semester average or weighted credits method</span></div>
+          </div>
+          <div class="feature-item">
+            <div class="fi-icon">📱</div>
+            <div class="fi-text"><strong>Mobile Friendly</strong><span>Card-based layout on smaller screens</span></div>
+          </div>
+          <div class="feature-item">
+            <div class="fi-icon">🏆</div>
+            <div class="fi-text"><strong>Visual Result</strong><span>Animated ring chart with grade breakdown</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ══════════ SECTION 1 ══════════ -->
+<div class="card">
+  <div class="card-head">
+    <div class="card-icon ci-blue">📚</div>
+    <div class="card-head-text">
+      <h2>Current Semester</h2>
+      <p>Auto-load by department &amp; semester, or search and add courses manually</p>
+    </div>
+  </div>
+
+  <div class="sec-label">Auto-load from database</div>
+  <div class="quick-load">
+    <div class="ql-group">
+      <label>Department</label>
+      <div class="combo-wrap" id="cw-dept">
+        <input class="combo-input" id="ci-dept" type="text" placeholder="Search department…" autocomplete="off"
+          oninput="onStaticComboInput('dept')"
+          onfocus="onStaticComboFocus('dept')"
+          onkeydown="onStaticComboKey(event,'dept')">
+        <span class="combo-arrow">▾</span>
+      </div>
+    </div>
+    <div class="ql-group">
+      <label>Semester</label>
+      <div class="combo-wrap" id="cw-sem">
+        <input class="combo-input" id="ci-sem" type="text" placeholder="Search semester…" autocomplete="off"
+          oninput="onStaticComboInput('sem')"
+          onfocus="onStaticComboFocus('sem')"
+          onkeydown="onStaticComboKey(event,'sem')">
+        <span class="combo-arrow">▾</span>
+      </div>
+    </div>
+    <button class="btn-load" onclick="loadSemCourses()">⚡ Load Courses</button>
+  </div>
+
+  <div class="sec-label">Grading scale</div>
+  <div class="grade-ref">
+    <span class="gc"><strong>A+</strong> ≥80% · 4.0</span>
+    <span class="gc"><strong>A</strong> 75–80% · 3.75</span>
+    <span class="gc"><strong>A−</strong> 70–75% · 3.5</span>
+    <span class="gc"><strong>B+</strong> 65–70% · 3.25</span>
+    <span class="gc"><strong>B</strong> 60–65% · 3.0</span>
+    <span class="gc"><strong>B−</strong> 55–60% · 2.75</span>
+    <span class="gc"><strong>C+</strong> 50–55% · 2.5</span>
+    <span class="gc"><strong>C</strong> 45–50% · 2.25</span>
+    <span class="gc"><strong>D</strong> 40–45% · 2.0</span>
+    <span class="gc"><strong>F</strong> &lt;40% · 0</span>
+  </div>
+
+  <div class="sec-label">Input mode</div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="mb-marks" onclick="setMode('marks')">🔢 Marks (%)</button>
+    <button class="mode-btn" id="mb-grade" onclick="setMode('grade')">🅰 Letter Grade</button>
+  </div>
+
+  <!-- Desktop layout -->
+  <div class="courses-desktop">
+    <div class="col-heads">
+      <span class="ch">Course Name</span>
+      <span class="ch">Course Code</span>
+      <span class="ch" id="ch-inp">Marks %</span>
+      <span class="ch">Credits</span>
+      <span class="ch"></span>
+    </div>
+    <div id="course-list"></div>
+  </div>
+
+  <!-- Mobile layout -->
+  <div class="courses-mobile" id="course-list-mobile" style="display:none;"></div>
+
+  <button class="btn-add" onclick="addRow()">＋ Add Course</button>
+  <button class="btn-calc" onclick="calcSGPA()">Calculate SGPA →</button>
+
+  <div class="sgpa-strip hidden" id="sgpa-strip">
+    <div>
+      <div class="sl">Semester GPA (SGPA)</div>
+      <div class="sv" id="sgpa-val">—</div>
+      <div class="sb" id="sgpa-sub"></div>
+    </div>
+    <div id="sgpa-pill" class="lpill lBp">—</div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 2 ══════════ -->
+<div class="card">
+  <div class="card-head">
+    <div class="card-icon ci-cyan">🗂️</div>
+    <div class="card-head-text">
+      <h2>CGPA Calculator</h2>
+      <p>Add semester SGPAs or an existing CGPA — current semester SGPA is optional</p>
+    </div>
+  </div>
+
+  <div class="prev-toggle">
+    <button class="ptb active" id="ptb-sems" onclick="prevMode('sems')">By Semester SGPA</button>
+    <button class="ptb" id="ptb-cgpa" onclick="prevMode('cgpa')">Overall CGPA + Credits</button>
+  </div>
+
+  <div id="pane-sems">
+    <div class="sem-heads">
+      <span class="ch">Semester Label (Optional)</span>
+      <span class="ch" style="text-align:left;">SGPA</span>
+      <span></span>
+    </div>
+    <div id="sem-list"></div>
+    <button class="btn-add" style="margin-top:10px;" onclick="addSemRow()">＋ Add Semester</button>
+    <p style="font-size:11.5px;color:var(--tlight);margin-top:10px;padding:0 2px;">
+      💡 CGPA = simple average of all entered SGPAs (including current semester if calculated above).
+    </p>
+  </div>
+
+  <div id="pane-cgpa" class="hidden">
+    <div class="two-col">
+      <div class="inp-group">
+        <label>Previous CGPA</label>
+        <input type="number" id="prev-cgpa-v" min="0" max="4" step="0.01" placeholder="e.g. 3.45">
+      </div>
+      <div class="inp-group">
+        <label>Total Credits Completed</label>
+        <input type="number" id="prev-cred-v" min="0" step="0.5" placeholder="e.g. 96">
+      </div>
+    </div>
+    <p style="font-size:11.5px;color:var(--tlight);margin-top:10px;">
+      💡 New CGPA = (Prev CGPA × Prev Credits + Current SGPA × Current Credits) ÷ Total Credits.
+      Current semester SGPA is included automatically if calculated above.
+    </p>
+  </div>
+
+  <button class="btn-calc" onclick="calcCGPA()">Calculate CGPA →</button>
+</div>
+
+<!-- ══════════ SECTION 3 ══════════ -->
+<div class="card hidden" id="cgpa-card">
+  <div class="card-head">
+    <div class="card-icon ci-indigo">🏆</div>
+    <div class="card-head-text">
+      <h2>Your CGPA Result</h2>
+      <p>Cumulative Grade Point Average</p>
+    </div>
+  </div>
+  <div class="cgpa-hero">
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#60a5fa"/>
+          <stop offset="100%" stop-color="#06b6d4"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="ring-area">
+      <svg class="ring-svg" width="130" height="130" viewBox="0 0 130 130">
+        <circle class="ring-bg-c" cx="65" cy="65" r="54"/>
+        <circle class="ring-prog" id="ring-prog" cx="65" cy="65" r="54"
+          stroke-dasharray="339.29" stroke-dashoffset="339.29"/>
+      </svg>
+      <div class="ring-center">
+        <div class="rc-lbl">CGPA</div>
+        <div class="rc-val" id="cgpa-disp">0.00</div>
+      </div>
+    </div>
+    <div class="cgpa-gpill" id="cgpa-gpill">—</div>
+    <div class="cgpa-stats">
+      <div class="cstat"><div class="cv" id="cs-sems">—</div><div class="ck">Semesters</div></div>
+      <div class="cstat" id="cs-cred-wrap"><div class="cv" id="cs-cred">—</div><div class="ck">Total Credits</div></div>
+      <div class="cstat" id="cs-sgpa-wrap"><div class="cv" id="cs-sgpa">—</div><div class="ck">Current SGPA</div></div>
+      <div class="cstat" id="cs-pts-wrap"><div class="cv" id="cs-pts">—</div><div class="ck">Grade Points</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ═══════════════ INFO MODAL ═══════════════ */
+function openInfoModal(){
+  const m=document.getElementById('infoModal');
+  m.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeInfoModal(){
+  const m=document.getElementById('infoModal');
+  m.classList.remove('open');
+  document.body.style.overflow='';
+}
+function handleModalOverlayClick(e){
+  if(e.target===document.getElementById('infoModal'))closeInfoModal();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeInfoModal();});
+
+/* ═══════════════ GRADES ═══════════════ */
+const GRADES=[
+  {min:80,letter:'A+', gp:4.0,  cls:'lAp'},
+  {min:75,letter:'A',  gp:3.75, cls:'lA' },
+  {min:70,letter:'A\u2212',gp:3.5, cls:'lAm'},
+  {min:65,letter:'B+', gp:3.25, cls:'lBp'},
+  {min:60,letter:'B',  gp:3.0,  cls:'lB' },
+  {min:55,letter:'B\u2212',gp:2.75,cls:'lBm'},
+  {min:50,letter:'C+', gp:2.5,  cls:'lCp'},
+  {min:45,letter:'C',  gp:2.25, cls:'lC' },
+  {min:40,letter:'D',  gp:2.0,  cls:'lD' },
+  {min:0, letter:'F',  gp:0,    cls:'lF' },
+];
+const GRADE_OPTS=[
+  {label:'A+ (4.0)', sub:'≥ 80%',  gp:4.0 },
+  {label:'A (3.75)', sub:'75–80%', gp:3.75},
+  {label:'A\u2212 (3.5)',sub:'70–75%',gp:3.5},
+  {label:'B+ (3.25)',sub:'65–70%', gp:3.25},
+  {label:'B (3.0)', sub:'60–65%',  gp:3.0 },
+  {label:'B\u2212 (2.75)',sub:'55–60%',gp:2.75},
+  {label:'C+ (2.5)', sub:'50–55%', gp:2.5 },
+  {label:'C (2.25)', sub:'45–50%', gp:2.25},
+  {label:'D (2.0)',  sub:'40–45%', gp:2.0 },
+  {label:'F (0)',    sub:'< 40%',  gp:0   },
+];
+const SEM_OPTS=[
+  {label:'1st Year · Odd Sem',sub:'1st Semester',  val:'11'},
+  {label:'1st Year · Even Sem',sub:'2nd Semester', val:'12'},
+  {label:'2nd Year · Odd Sem',sub:'3rd Semester',  val:'21'},
+  {label:'2nd Year · Even Sem',sub:'4th Semester', val:'22'},
+  {label:'3rd Year · Odd Sem',sub:'5th Semester',  val:'31'},
+  {label:'3rd Year · Even Sem',sub:'6th Semester', val:'32'},
+  {label:'4th Year · Odd Sem',sub:'7th Semester',  val:'41'},
+  {label:'4th Year · Even Sem',sub:'8th Semester', val:'42'},
+  {label:'5th Year · Odd Sem',sub:'9th Semester',  val:'51'},
+  {label:'5th Year · Even Sem',sub:'10th Semester', val:'52'},
+];
+function gradeFromMarks(p){for(const g of GRADES)if(p>=g.min)return g;return GRADES[GRADES.length-1];}
+function gradeFromGP(gp){for(const g of GRADES)if(gp>=g.gp)return g;return GRADES[GRADES.length-1];}
+
+/* ═══════════════ TOAST ═══════════════ */
+function toast(title,msg='',type='info'){
+  const icons={info:'ℹ️',warn:'⚠️',err:'❌',ok:'✅'};
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<div class="toast-icon">${icons[type]||'ℹ️'}</div>
+    <div class="toast-body"><div class="toast-title">${title}</div>${msg?`<div class="toast-msg">${msg}</div>`:''}</div>
+    <button class="toast-close" onclick="dismissToast(this.parentElement)">×</button>`;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>dismissToast(t),4500);
+}
+function dismissToast(el){
+  if(!el||!el.parentElement)return;
+  el.style.animation='toastOut .3s ease forwards';
+  setTimeout(()=>el.remove(),300);
+}
+
+/* ═══════════════ STATE ═══════════════ */
+let inputMode='marks',prevInputMode='sems';
+let rowCount=0,semCount=0;
+let curSGPA=null,curCredits=0;
+let db=null;
+let activePortal=null;
+
+/* ═══════════════ MOBILE DETECTION ═══════════════ */
+function isMobile(){return window.innerWidth<=768;}
+
+/* ═══════════════ PORTAL DROPDOWN ENGINE ═══════════════ */
+function getPortal(){return document.getElementById('drop-portal');}
+
+function openPortal(triggerId, items, onSelect, searchable=false){
+  closePortal();
+  const trigger=document.getElementById(triggerId);
+  if(!trigger)return;
+  const portal=getPortal();
+  const drop=document.createElement('div');
+  drop.className='portal-drop';
+  drop.id='active-drop';
+  portal.appendChild(drop);
+  activePortal={el:drop, triggerId, onSelect, items:[...items], focusIdx:-1, searchable};
+  renderPortalItems(items, drop, onSelect, searchable);
+  positionPortal(trigger, drop);
+  drop.classList.add('open');
+  trigger.closest('.combo-wrap')?.classList.add('open');
+}
+
+function renderPortalItems(items, drop, onSelect, searchable, query=''){
+  drop.innerHTML='';
+  if(searchable){
+    const sw=document.createElement('div');
+    sw.className='pd-search-wrap';
+    sw.innerHTML=`<input class="pd-search" id="portal-search" placeholder="Search…" autocomplete="off" value="${esc(query)}">`;
+    drop.appendChild(sw);
+    const si=sw.querySelector('#portal-search');
+    si.oninput=e=>{
+      if(!activePortal)return;
+      const q=e.target.value.toLowerCase();
+      const filtered=activePortal.items.filter(it=>
+        it.label.toLowerCase().includes(q)||(it.sub||'').toLowerCase().includes(q)
+      );
+      renderPortalItems(filtered,drop,onSelect,searchable,e.target.value);
+      activePortal.focusIdx=-1;
+      drop.querySelector('#portal-search')?.focus();
+    };
+    si.onkeydown=e=>portalKeydown(e);
+    requestAnimationFrame(()=>si.focus());
+  }
+  const filtered=query
+    ?items.filter(it=>it.label.toLowerCase().includes(query.toLowerCase())||(it.sub||'').toLowerCase().includes(query.toLowerCase()))
+    :items;
+  if(!filtered.length){
+    const no=document.createElement('div');
+    no.className='pd-opt-no';no.textContent='No matches found';
+    drop.appendChild(no);return;
+  }
+  filtered.forEach((it,i)=>{
+    const d=document.createElement('div');
+    d.className='pd-opt';d.dataset.idx=i;
+    d.innerHTML=`<span class="pd-opt-main">${esc(it.label)}</span>${it.sub?`<span class="pd-opt-sub">${esc(it.sub)}</span>`:''}`;
+    d.onmousedown=e=>{e.preventDefault();selectPortalItem(it,onSelect);};
+    drop.appendChild(d);
+  });
+}
+
+function selectPortalItem(item, onSelect){onSelect(item);closePortal();}
+
+function positionPortal(trigger, drop){
+  const rect=trigger.getBoundingClientRect();
+  drop.style.left=rect.left+'px';
+  drop.style.top=(rect.bottom+4)+'px';
+  drop.style.width=Math.max(rect.width,200)+'px';
+  drop.style.maxHeight='260px';
+}
+
+function closePortal(){
+  const existing=document.getElementById('active-drop');
+  if(existing)existing.remove();
+  document.querySelectorAll('.combo-wrap.open').forEach(w=>w.classList.remove('open'));
+  activePortal=null;
+}
+
+function portalKeydown(e){
+  if(!activePortal)return;
+  const drop=activePortal.el;
+  const opts=[...drop.querySelectorAll('.pd-opt')];
+  if(!opts.length)return;
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    activePortal.focusIdx=Math.min(activePortal.focusIdx+1,opts.length-1);
+    opts.forEach((o,i)=>o.classList.toggle('focused',i===activePortal.focusIdx));
+    opts[activePortal.focusIdx]?.scrollIntoView({block:'nearest'});
+  }else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    activePortal.focusIdx=Math.max(activePortal.focusIdx-1,0);
+    opts.forEach((o,i)=>o.classList.toggle('focused',i===activePortal.focusIdx));
+    opts[activePortal.focusIdx]?.scrollIntoView({block:'nearest'});
+  }else if(e.key==='Enter'&&activePortal.focusIdx>=0){
+    e.preventDefault();
+    const visibleItems=opts.map(o=>activePortal.items.find(it=>esc(it.label)===o.querySelector('.pd-opt-main')?.innerHTML));
+    const chosen=visibleItems[activePortal.focusIdx];
+    if(chosen)selectPortalItem(chosen,activePortal.onSelect);
+  }else if(e.key==='Escape'){closePortal();}
+}
+
+window.addEventListener('scroll',()=>{
+  if(!activePortal)return;
+  const trigger=document.getElementById(activePortal.triggerId);
+  if(trigger&&activePortal.el)positionPortal(trigger,activePortal.el);
+},true);
+window.addEventListener('resize',()=>{
+  if(!activePortal)return;
+  const trigger=document.getElementById(activePortal.triggerId);
+  if(trigger&&activePortal.el)positionPortal(trigger,activePortal.el);
+  syncMobileDesktop();
+});
+
+document.addEventListener('mousedown',e=>{
+  if(!activePortal)return;
+  const drop=activePortal.el;
+  const trigger=document.getElementById(activePortal.triggerId);
+  if(drop&&!drop.contains(e.target)&&trigger&&!trigger.closest('.combo-wrap').contains(e.target)){
+    closePortal();
+  }
+});
+
+/* ═══════════════ STATIC COMBOS (dept / sem) ═══════════════ */
+let selectedDept='';
+let selectedSem='';
+
+function onStaticComboFocus(type){openStaticDrop(type);}
+function onStaticComboInput(type){
+  const q=document.getElementById(`ci-${type}`).value;
+  openStaticDrop(type,q);
+}
+function onStaticComboKey(e,type){portalKeydown(e);}
+
+function openStaticDrop(type, query=''){
+  const triggerId=`ci-${type}`;
+  if(type==='dept'){
+    if(!db||!db.departments.length)return;
+    const items=db.departments.map(d=>({label:d.title,sub:d.fullName||'',val:d.code}));
+    const filtered=query?items.filter(it=>it.label.toLowerCase().includes(query.toLowerCase())):items;
+    openPortal(triggerId, filtered, item=>{
+      selectedDept=item.val;
+      document.getElementById('ci-dept').value=item.label;
+      document.querySelectorAll('.cr').forEach(r=>{
+        const id=r.dataset.id;
+        refreshCourseCombo(id,'name');
+        refreshCourseCombo(id,'code');
+      });
+    }, false);
+  }else{
+    const filtered=query
+      ?SEM_OPTS.filter(s=>s.label.toLowerCase().includes(query.toLowerCase())||s.sub.toLowerCase().includes(query.toLowerCase()))
+      :SEM_OPTS;
+    openPortal(triggerId, filtered, item=>{
+      selectedSem=item.val;
+      document.getElementById('ci-sem').value=item.label;
+    }, false);
+  }
+}
+
+/* ═══════════════ COURSE COMBO ═══════════════ */
+function getCoursesForDept(){
+  if(!selectedDept||!db)return[];
+  return db.courses.filter(c=>c.dept===selectedDept);
+}
+
+function buildCourseComboHTML(id,field){
+  const ph=field==='name'?'Search course name…':'Search course code…';
+  return `<div class="combo-wrap" id="cw-${field}-${id}">
+    <input class="combo-input" id="ci-${field}-${id}" type="text" placeholder="${ph}" autocomplete="off"
+      oninput="onCourseComboInput('${id}','${field}')"
+      onfocus="onCourseComboFocus('${id}','${field}')"
+      onkeydown="portalKeydown(event)">
+    <span class="combo-arrow">▾</span>
+  </div>`;
+}
+
+function onCourseComboFocus(id,field){
+  const q=(document.getElementById(`ci-${field}-${id}`)?.value||'').toLowerCase();
+  openCoursePortal(id,field,q);
+}
+function onCourseComboInput(id,field){
+  const q=(document.getElementById(`ci-${field}-${id}`)?.value||'').toLowerCase();
+  openCoursePortal(id,field,q);
+}
+
+function openCoursePortal(id,field,query){
+  // id can be like "3" (desktop) or "3m" (mobile) — strip 'm' to get base id
+  const baseId=String(id).replace(/m$/,'');
+  const courses=getCoursesForDept();
+  if(!courses.length)return;
+  const triggerId=`ci-${field}-${id}`;
+  const filtered=courses.filter(c=>{
+    const q=query.toLowerCase();
+    return field==='name'
+      ?c.title.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)
+      :c.code.toLowerCase().includes(q)||c.title.toLowerCase().includes(q);
+  }).slice(0,25);
+  const items=filtered.map(c=>({
+    label: field==='name'?c.title:c.code,
+    sub:   field==='name'?`${c.code} · ${c.credit} cr`:c.title,
+    _course:c
+  }));
+  openPortal(triggerId, items, item=>{
+    const c=item._course;
+    // Fill desktop fields
+    const ni=document.getElementById(`ci-name-${baseId}`);
+    const ci=document.getElementById(`ci-code-${baseId}`);
+    const cri=document.getElementById(`cr-${baseId}`);
+    if(ni)ni.value=c.title;
+    if(ci)ci.value=c.code;
+    if(cri)cri.value=c.credit;
+    // Fill mobile fields
+    const nim=document.getElementById(`ci-name-${baseId}m`);
+    const cim=document.getElementById(`ci-code-${baseId}m`);
+    const crim=document.getElementById(`cr-${baseId}m`);
+    if(nim)nim.value=c.title;
+    if(cim)cim.value=c.code;
+    if(crim)crim.value=c.credit;
+  }, false);
+}
+
+function refreshCourseCombo(id,field){
+  const wrap=document.getElementById(`cw-${field}-${id}`);
+  if(!wrap)return;
+  const val=document.getElementById(`ci-${field}-${id}`)?.value||'';
+  const newHTML=buildCourseComboHTML(id,field);
+  wrap.outerHTML=newHTML;
+  const inp=document.getElementById(`ci-${field}-${id}`);
+  if(inp)inp.value=val;
+}
+
+/* ═══════════════ GRADE COMBO ═══════════════ */
+function buildGradeComboHTML(id){
+  return `<div class="combo-wrap" id="cw-grade-${id}">
+    <input class="combo-input" id="ci-grade-${id}" type="text" placeholder="Select grade…" autocomplete="off" readonly
+      onfocus="openGradePortal(${id})"
+      onkeydown="portalKeydown(event)">
+    <span class="combo-arrow">▾</span>
+  </div>`;
+}
+
+function openGradePortal(id){
+  const triggerId=`ci-grade-${id}`;
+  const items=GRADE_OPTS.map(g=>({label:g.label,sub:g.sub,_gp:g.gp}));
+  openPortal(triggerId, items, item=>{
+    const inp=document.getElementById(`ci-grade-${id}`);
+    if(inp){inp.value=item.label;inp.dataset.gp=item._gp;}
+    // sync mobile
+    const inpm=document.getElementById(`ci-grade-${id}m`);
+    if(inpm){inpm.value=item.label;inpm.dataset.gp=item._gp;}
+  }, false);
+}
+
+/* ═══════════════ ADD / REMOVE ROWS ═══════════════ */
+function addRow(title='',code='',credit=''){
+  rowCount++;const id=rowCount;const isMark=inputMode==='marks';
+
+  // — Desktop row —
+  const div=document.createElement('div');
+  div.className='cr';div.id=`row-${id}`;div.dataset.id=id;
+  div.innerHTML=`
+    ${buildCourseComboHTML(id,'name')}
+    ${buildCourseComboHTML(id,'code')}
+    <div class="cell-marks${isMark?'':' hidden'}">
+      <input type="number" id="mk-${id}" min="0" max="100" step="0.1" placeholder="0–100">
+    </div>
+    <div class="cell-grade${isMark?' hidden':''}">
+      ${buildGradeComboHTML(id)}
+    </div>
+    <input type="number" id="cr-${id}" min="0.25" max="6" step="0.25" placeholder="Cr.">
+    <button class="btn-rm" onclick="removeRow(${id})">✕</button>
+  `;
+  document.getElementById('course-list').appendChild(div);
+
+  // — Mobile card —
+  const card=document.createElement('div');
+  card.className='cr-card';card.id=`mrow-${id}`;card.dataset.id=id;
+  card.innerHTML=`
+    <div class="cr-card-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="cr-card-num">${id}</div>
+        <span class="cr-card-label">Course ${id}</span>
+      </div>
+      <button class="btn-rm" onclick="removeRow(${id})">✕</button>
+    </div>
+    <div class="cr-card-fields">
+      <div class="cr-card-field">
+        <label>Course Name</label>
+        ${buildCourseComboHTML(id+'m','name')}
+      </div>
+      <div class="cr-card-row">
+        <div class="cr-card-field">
+          <label>Course Code</label>
+          ${buildCourseComboHTML(id+'m','code')}
+        </div>
+        <div class="cr-card-field">
+          <label>Credits</label>
+          <input type="number" id="cr-${id}m" min="0.25" max="6" step="0.25" placeholder="e.g. 3.0">
+        </div>
+      </div>
+      <div class="cr-card-field cell-marks-m${isMark?'':' hidden'}">
+        <label>Marks (%)</label>
+        <input type="number" id="mk-${id}m" min="0" max="100" step="0.1" placeholder="0–100">
+      </div>
+      <div class="cr-card-field cell-grade-m${isMark?' hidden':''}">
+        <label>Grade</label>
+        ${buildGradeComboHTMLMobile(id)}
+      </div>
+    </div>
+  `;
+  document.getElementById('course-list-mobile').appendChild(card);
+
+  // Sync mobile fields back to desktop on input
+  const syncField=(mobileId, desktopId)=>{
+    const mEl=document.getElementById(mobileId);
+    const dEl=document.getElementById(desktopId);
+    if(mEl&&dEl){
+      mEl.addEventListener('input',()=>{dEl.value=mEl.value;});
+      dEl.addEventListener('input',()=>{mEl.value=dEl.value;});
+    }
+  };
+  syncField(`mk-${id}m`,`mk-${id}`);
+  syncField(`cr-${id}m`,`cr-${id}`);
+
+  if(title){
+    const ni=document.getElementById(`ci-name-${id}`);if(ni)ni.value=title;
+    const nim=document.getElementById(`ci-name-${id}m`);if(nim)nim.value=title;
+  }
+  if(code){
+    const ci=document.getElementById(`ci-code-${id}`);if(ci)ci.value=code;
+    const cim=document.getElementById(`ci-code-${id}m`);if(cim)cim.value=code;
+  }
+  if(credit){
+    const cri=document.getElementById(`cr-${id}`);if(cri)cri.value=credit;
+    const crim=document.getElementById(`cr-${id}m`);if(crim)crim.value=credit;
+  }
+  renumberCards();
+}
+
+function buildGradeComboHTMLMobile(id){
+  return `<div class="combo-wrap" id="cw-grade-${id}m">
+    <input class="combo-input" id="ci-grade-${id}m" type="text" placeholder="Select grade…" autocomplete="off" readonly
+      onfocus="openGradePortalMobile(${id})"
+      onkeydown="portalKeydown(event)">
+    <span class="combo-arrow">▾</span>
+  </div>`;
+}
+
+function openGradePortalMobile(id){
+  const triggerId=`ci-grade-${id}m`;
+  const items=GRADE_OPTS.map(g=>({label:g.label,sub:g.sub,_gp:g.gp}));
+  openPortal(triggerId, items, item=>{
+    // sync both desktop and mobile grade
+    const inp=document.getElementById(`ci-grade-${id}m`);
+    const dinp=document.getElementById(`ci-grade-${id}`);
+    if(inp){inp.value=item.label;inp.dataset.gp=item._gp;}
+    if(dinp){dinp.value=item.label;dinp.dataset.gp=item._gp;}
+  }, false);
+}
+
+function removeRow(id){
+  document.getElementById(`row-${id}`)?.remove();
+  document.getElementById(`mrow-${id}`)?.remove();
+  renumberCards();
+}
+
+function renumberCards(){
+  const cards=[...document.querySelectorAll('#course-list-mobile .cr-card')];
+  cards.forEach((card,i)=>{
+    const n=i+1;
+    const numEl=card.querySelector('.cr-card-num');
+    const labelEl=card.querySelector('.cr-card-label');
+    if(numEl)numEl.textContent=n;
+    if(labelEl)labelEl.textContent=`Course ${n}`;
+  });
+}
+
+/* Sync mobile visibility with mobile state */
+function syncMobileDesktop(){
+  const mobile=isMobile();
+  document.getElementById('course-list-mobile').style.display=mobile?'flex':'none';
+  const desktopList=document.getElementById('course-list');
+  if(desktopList)desktopList.parentElement.querySelector('.col-heads').style.display=mobile?'none':'grid';
+}
+
+/* ═══════════════ LOAD COURSES FROM DB ═══════════════ */
+function semKeyFromCode(code){
+  const m=code.replace(/\s/g,'').match(/(\d)(\d)\d{2}/);
+  return m?m[1]+m[2]:null;
+}
+
+function loadSemCourses(){
+  if(!selectedDept){toast('Select Department','Please search and select a department first.','warn');return;}
+  if(!selectedSem){toast('Select Semester','Please search and select a semester.','warn');return;}
+  const list=db.courses.filter(c=>c.dept===selectedDept&&semKeyFromCode(c.code)===selectedSem);
+  if(!list.length){toast('No courses found','No courses in the database for this combination.','warn');return;}
+  document.getElementById('course-list').innerHTML='';
+  document.getElementById('course-list-mobile').innerHTML='';
+  rowCount=0;
+  list.forEach(c=>addRow(c.title,c.code,c.credit));
+  toast('Courses loaded',`${list.length} courses loaded.`,'ok');
+}
+
+/* ═══════════════ INPUT MODE ═══════════════ */
+function setMode(m){
+  inputMode=m;
+  document.getElementById('mb-marks').classList.toggle('active',m==='marks');
+  document.getElementById('mb-grade').classList.toggle('active',m==='grade');
+  document.getElementById('ch-inp').textContent=m==='marks'?'Marks %':'Grade';
+  // Desktop
+  document.querySelectorAll('.cr').forEach(r=>{
+    r.querySelector('.cell-marks')?.classList.toggle('hidden',m!=='marks');
+    r.querySelector('.cell-grade')?.classList.toggle('hidden',m!=='grade');
+  });
+  // Mobile cards
+  document.querySelectorAll('.cr-card').forEach(c=>{
+    c.querySelector('.cell-marks-m')?.classList.toggle('hidden',m!=='marks');
+    c.querySelector('.cell-grade-m')?.classList.toggle('hidden',m!=='grade');
+  });
+}
+
+/* ═══════════════ SGPA – read from active layout ═══════════════ */
+function getRowValue(id){
+  // try desktop first, then mobile
+  const crD=document.getElementById(`cr-${id}`);
+  const crM=document.getElementById(`cr-${id}m`);
+  const cr=parseFloat(crD?.value||crM?.value);
+
+  let mk, gp;
+  if(inputMode==='marks'){
+    const mkD=document.getElementById(`mk-${id}`);
+    const mkM=document.getElementById(`mk-${id}m`);
+    mk=parseFloat(mkD?.value??mkM?.value);
+    gp=gradeFromMarks(mk).gp;
+    return{cr,mk,gp};
+  }else{
+    const gD=document.getElementById(`ci-grade-${id}`);
+    const gM=document.getElementById(`ci-grade-${id}m`);
+    const gpVal=parseFloat(gD?.dataset?.gp??gM?.dataset?.gp);
+    return{cr,gp:gpVal};
+  }
+}
+
+function calcSGPA(){
+  // collect from desktop rows (source of truth, synced with mobile)
+  const rows=[...document.querySelectorAll('.cr')];
+  if(!rows.length){toast('No courses','Please add at least one course.','warn');return;}
+  let tp=0,tc=0,errs=[];
+  rows.forEach((r,i)=>{
+    const id=r.dataset.id;
+    const cred=parseFloat(document.getElementById(`cr-${id}`)?.value
+      ||document.getElementById(`cr-${id}m`)?.value);
+    if(isNaN(cred)||cred<=0){errs.push(`Row ${i+1}: invalid credit`);return;}
+    let gp;
+    if(inputMode==='marks'){
+      const mkD=document.getElementById(`mk-${id}`);
+      const mkM=document.getElementById(`mk-${id}m`);
+      const mk=parseFloat(mkD?.value??mkM?.value);
+      if(isNaN(mk)||mk<0||mk>100){errs.push(`Row ${i+1}: enter marks 0–100`);return;}
+      gp=gradeFromMarks(mk).gp;
+    }else{
+      const gD=document.getElementById(`ci-grade-${id}`);
+      const gM=document.getElementById(`ci-grade-${id}m`);
+      const gv=parseFloat(gD?.dataset?.gp??gM?.dataset?.gp);
+      if(isNaN(gv)){errs.push(`Row ${i+1}: no grade selected`);return;}
+      gp=gv;
+    }
+    tp+=gp*cred;tc+=cred;
+  });
+  if(errs.length){toast('Missing information',errs.join('<br>'),'err');return;}
+  if(tc===0){toast('Zero credits','Total credits must be > 0.','warn');return;}
+  const sgpa=tp/tc;curSGPA=sgpa;curCredits=tc;
+  const g=gradeFromGP(sgpa);
+  document.getElementById('sgpa-strip').classList.remove('hidden');
+  document.getElementById('sgpa-val').textContent=sgpa.toFixed(2);
+  document.getElementById('sgpa-sub').textContent=`${rows.length} course${rows.length>1?'s':''} · ${tc.toFixed(2)} credits · ${tp.toFixed(2)} grade pts`;
+  const pill=document.getElementById('sgpa-pill');
+  pill.textContent=g.letter;pill.className=`lpill ${g.cls}`;
+  toast('SGPA Calculated',`Your SGPA is ${sgpa.toFixed(2)} (${g.letter})`,'ok');
+}
+
+/* ═══════════════ PREV MODE ═══════════════ */
+function prevMode(m){
+  prevInputMode=m;
+  document.getElementById('pane-sems').classList.toggle('hidden',m!=='sems');
+  document.getElementById('pane-cgpa').classList.toggle('hidden',m!=='cgpa');
+  document.getElementById('ptb-sems').classList.toggle('active',m==='sems');
+  document.getElementById('ptb-cgpa').classList.toggle('active',m==='cgpa');
+}
+
+function addSemRow(){
+  semCount++;const id=semCount;
+  const div=document.createElement('div');
+  div.className='sem-row';div.id=`sem-${id}`;
+  div.innerHTML=`
+    <input type="text" placeholder="Semester ${id}">
+    <input type="number" min="0" max="4" step="0.01" placeholder="SGPA (0.00–4.00)">
+    <button class="btn-rm" onclick="removeSemRow('sem-${id}')">✕</button>
+  `;
+  document.getElementById('sem-list').appendChild(div);
+  renumberSemRows();
+}
+
+function removeSemRow(elemId){
+  document.getElementById(elemId)?.remove();
+  renumberSemRows();
+}
+
+function renumberSemRows(){
+  const rows=[...document.querySelectorAll('#sem-list .sem-row')];
+  rows.forEach((row,i)=>{
+    const n=i+1;
+    const inp=row.querySelectorAll('input')[0];
+    if(inp&&!inp.value)inp.placeholder=`Semester ${n}`;
+    else if(inp)inp.placeholder=`Semester ${n}`;
+  });
+}
+
+/* ═══════════════ CGPA ═══════════════ */
+function calcCGPA(){
+  if(prevInputMode==='sems'){
+    const rows=[...document.querySelectorAll('.sem-row')];
+    const sgpas=[];
+    rows.forEach(r=>{
+      const v=parseFloat(r.querySelectorAll('input')[1]?.value);
+      if(!isNaN(v)&&v>=0&&v<=4)sgpas.push(v);
+    });
+    if(curSGPA!==null)sgpas.push(curSGPA);
+    if(!sgpas.length){toast('No data','Enter at least one SGPA or calculate current SGPA above.','warn');return;}
+    const cgpa=sgpas.reduce((a,b)=>a+b,0)/sgpas.length;
+    showCGPAResult(cgpa,gradeFromGP(cgpa),sgpas.length,null,null,true);
+  }else{
+    const pc=parseFloat(document.getElementById('prev-cgpa-v')?.value);
+    const pr=parseFloat(document.getElementById('prev-cred-v')?.value);
+    if(isNaN(pc)||isNaN(pr)||pr<=0){
+      if(curSGPA===null){toast('Missing data','Enter previous CGPA and credits, or calculate current SGPA first.','warn');return;}
+      showCGPAResult(curSGPA,gradeFromGP(curSGPA),1,curCredits,curSGPA*curCredits,false);
+      return;
+    }
+    let tp=pc*pr,tc=pr,ns=Math.max(1,Math.round(pr/20));
+    if(curSGPA!==null){tp+=curSGPA*curCredits;tc+=curCredits;ns++;}
+    const cgpa=tp/tc;
+    showCGPAResult(cgpa,gradeFromGP(cgpa),ns,tc,tp,false);
+  }
+}
+
+function showCGPAResult(cgpa,g,ns,tc,tp,isSemAvg){
+  document.getElementById('cgpa-card').classList.remove('hidden');
+  document.getElementById('cgpa-disp').textContent=cgpa.toFixed(2);
+  document.getElementById('cgpa-gpill').textContent=`${g.letter}  ·  ${cgpa.toFixed(2)}`;
+  document.getElementById('cs-sems').textContent=ns;
+  const cw=document.getElementById('cs-cred-wrap'),pw=document.getElementById('cs-pts-wrap'),sw=document.getElementById('cs-sgpa-wrap');
+  if(isSemAvg){cw.classList.add('hidden');pw.classList.add('hidden');}
+  else{
+    cw.classList.remove('hidden');pw.classList.remove('hidden');
+    document.getElementById('cs-cred').textContent=(tc||0).toFixed(2);
+    document.getElementById('cs-pts').textContent=(tp||0).toFixed(2);
+  }
+  if(curSGPA!==null){sw.classList.remove('hidden');document.getElementById('cs-sgpa').textContent=curSGPA.toFixed(2);}
+  else sw.classList.add('hidden');
+  document.getElementById('ring-prog').style.strokeDashoffset=339.29*(1-Math.min(cgpa/4,1));
+  document.getElementById('cgpa-card').scrollIntoView({behavior:'smooth',block:'start'});
+  toast('CGPA Calculated',`Your CGPA is ${cgpa.toFixed(2)} (${g.letter})`,'ok');
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ═══════════════ DB LOAD ═══════════════ */
+async function initDB(){
+  try{
+    const r=await fetch('courses.json');
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    db=await r.json();
+  }catch(e){
+    db={departments:[],courses:[]};
+    toast('Database error',`Could not load courses.json: ${e.message}. Manual input only.`,'err');
+  }
+  addRow();addRow();addRow();
+  addSemRow();addSemRow();
+  syncMobileDesktop();
+}
+
+initDB();
+</script>
+
+<!-- Shared Footer -->
+<div id="fk-footer"></div>
+<script src="layout.js" data-page="cgpa-calculator"></script>
+</body>
+</html>

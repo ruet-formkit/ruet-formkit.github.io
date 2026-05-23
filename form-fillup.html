@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Exam Application Form Generator — RUET FormKit</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+(function(){
+  const saved = localStorage.getItem('ruetFormkit_theme');
+  const dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+})();
+</script>
+<link rel="stylesheet" href="layout.css">
+<!-- Page-specific extra: add padding-top for fixed header -->
+<style>
+body {
+  padding-top: calc(68px + 20px) !important;
+}
+/* page-inner-header: styled like original site-header but as a normal div */
+.page-inner-header {
+  width: 215.9mm;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0 18px;
+  font-family: 'Sora', sans-serif;
+  position: relative;
+  margin: 0 auto;
+}
+@media screen and (max-width:820px) {
+  .page-inner-header { width:100%; padding:16px 0 12px; }
+}
+/* Dark mode overrides for this page's CSS variables */
+[data-theme="dark"] {
+  --bg: #0d1117;
+  --surface: #0f172a;
+  --surface2: #1e293b;
+  --b50: #0f2027; --b100: #14532d22; --b200: #bbf7d030;
+  --b300: #86efac50; --b400: #4ade8080;
+  --navy: #86efac;
+  --text: #e2e8f0; --tmid: #94a3b8; --tlight: #64748b;
+  --border: rgba(134,239,172,0.2); --border2: rgba(255,255,255,0.1);
+  --shadow: 0 8px 40px rgba(0,0,0,.4);
+}
+[data-theme="dark"] body {
+  background: #0d1117 !important;
+}
+[data-theme="dark"] .loader-panel,
+[data-theme="dark"] .pdf-instruction {
+  background: #0f172a;
+  border-color: rgba(134,239,172,0.15);
+}
+[data-theme="dark"] .combo-input {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: rgba(134,239,172,0.2);
+}
+[data-theme="dark"] .page {
+  background: #1a2236 !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+[data-theme="dark"] .page input,
+[data-theme="dark"] .page textarea {
+  color: #e2e8f0 !important;
+  background: transparent !important;
+}
+[data-theme="dark"] .page .courses-table th,
+[data-theme="dark"] .page .courses-table td {
+  border-color: rgba(255,255,255,0.15) !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .page .courses-table th {
+  background: #1e293b !important;
+}
+[data-theme="dark"] .page .courses-table td {
+  background: transparent !important;
+}
+/* Hide old .site-header class if it somehow persists */
+.site-header.old-header { display: none !important; }
+/* Info modal dark mode */
+[data-theme="dark"] .info-modal {
+  background: #0f172a !important;
+  border-color: rgba(134,239,172,0.15) !important;
+  color: #e2e8f0 !important;
+}
+[data-theme="dark"] .info-section-title { color: #86efac !important; }
+[data-theme="dark"] .info-section-title::after { background: rgba(134,239,172,0.15) !important; }
+[data-theme="dark"] .info-features li,
+[data-theme="dark"] .info-steps li { color: #cbd5e1 !important; }
+[data-theme="dark"] .info-steps .step-num { background: #1e293b !important; color: #86efac !important; }
+[data-theme="dark"] .drop-list { background: #0f172a !important; border-color: rgba(134,239,172,0.2) !important; }
+[data-theme="dark"] .drop-item { color: #e2e8f0 !important; }
+[data-theme="dark"] .drop-item:hover, [data-theme="dark"] .drop-item.active { background: rgba(134,239,172,0.07) !important; }
+[data-theme="dark"] .drop-item .di-main { color: #e2e8f0 !important; }
+[data-theme="dark"] .drop-item .di-sub { color: #86efac !important; }
+@media print {
+  /* Force light mode: override dark theme for printing */
+  html, body { background: #fff !important; color: #111 !important; }
+  body * { color: #111 !important; background: transparent !important; }
+  #fk-header, #fk-footer, .site-footer, .site-header,
+  .sidebar-overlay, .mobile-sidebar,
+  .page-inner-header, .loader-panel,
+  .btn-download, .pdf-instruction,
+  #toast-container, #drop-portal,
+  .info-overlay, .instructions-pill { display: none !important; }
+  .page {
+    box-shadow: none !important;
+    width: 100% !important;
+    min-height: unset !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #111 !important;
+    border: none !important;
+  }
+  .page::before { display: none; }
+  body { padding: 0 !important; margin: 0 !important; background: #fff !important; }
+
+  /* Override dark-mode high-specificity rules that survive into print */
+  [data-theme="dark"] .page {
+    background: #fff !important;
+    color: #111 !important;
+    border: none !important;
+  }
+  [data-theme="dark"] .page input,
+  [data-theme="dark"] .page textarea,
+  [data-theme="dark"] .page .ac-input {
+    color: #111 !important;
+    -webkit-text-fill-color: #111 !important;
+    background: transparent !important;
+  }
+  [data-theme="dark"] .page .courses-table th,
+  [data-theme="dark"] .page .courses-table td {
+    color: #111 !important;
+    -webkit-text-fill-color: #111 !important;
+    border-color: #333 !important;
+    background: transparent !important;
+  }
+  [data-theme="dark"] .page .courses-table th {
+    background: #f5f5f5 !important;
+  }
+  [data-theme="dark"] .page * {
+    color: #111 !important;
+    -webkit-text-fill-color: #111 !important;
+    background: transparent !important;
+  }
+}
+</style>
+<style>
+@import url('https://fonts.maateen.me/solaiman-lipi/font.css');
+*{margin:0;padding:0;box-sizing:border-box;}
+
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg: #edfaf4;
+  --surface: #fff;
+  --surface2: #f0fdf6;
+  --b50: #f0fdf4;  --b100: #dcfce7;  --b200: #bbf7d0;  --b300: #86efac;
+  --b400: #4ade80; --b500: #22c55e;  --b600: #16a34a;  --b700: #15803d;
+  --navy: #14532d;
+  --text: #111827; --tmid: #4b5563;  --tlight: #9ca3af;
+  --border: #bbf7d0; --border2: #e5e7eb;
+  --r: 16px; --rsm: 10px;
+  --shadow: 0 8px 40px rgba(34,197,94,.13);
+}
+
+body{
+  background: var(--bg);
+  font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',Arial,sans-serif;
+  padding:0 0 0;
+  min-height:100vh;
+}
+
+/* ===== PAGE INNER HEADER (replaces old .site-header) ===== */
+.page-inner-header{
+  width:215.9mm;
+  max-width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  padding:20px 20px 16px;
+  font-family:'Sora',sans-serif;
+  position:relative;
+  margin:0 auto;
+}
+.page-inner-header .sh-logo{
+  height:130px;
+  width:auto;
+  object-fit:contain;
+}
+.page-inner-header .sh-text{
+  text-align:center;
+}
+.page-inner-header .sh-title{
+  font-size:2rem;
+  font-weight:700;
+  color:var(--navy);
+  line-height:1.2;
+  font-family:'Sora',sans-serif;
+}
+.page-inner-header .sh-title span{color:var(--b600);}
+.page-inner-header .sh-sub{
+  font-size:0.92rem;
+  color:var(--tlight);
+  margin-top:7px;
+  font-family:'Sora',sans-serif;
+  font-weight:400;
+}
+
+/* ===== LOADER PANEL ===== */
+.loader-panel{
+  width:215.9mm;
+  max-width:100%;
+  background:var(--surface);
+  border-radius:var(--r);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  padding:18px 22px 20px;
+  margin:0 auto 18px;
+}
+.lp-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+}
+.lp-title{
+  font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;
+  font-size:13pt;
+  font-weight:bold;
+  color:var(--navy);
+  white-space:nowrap;
+}
+.lp-line{flex:1;height:1.5px;background:linear-gradient(to right,var(--b300),transparent);}
+.lp-row{
+  display:flex;
+  align-items:flex-end;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.lp-field{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  position:relative;
+  flex:1;
+  min-width:160px;
+}
+.lp-field.sem-field{max-width:200px;}
+.lp-label{
+  font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;
+  font-size:9.5pt;
+  color:var(--tmid);
+  font-weight:600;
+}
+.combo-input{
+  width:100%;
+  border:1.5px solid var(--border);
+  border-radius:var(--rsm);
+  padding:9px 12px;
+  font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;
+  font-size:10pt;
+  color:var(--text);
+  background:var(--b50);
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.combo-input:focus{
+  border-color:var(--b500);
+  box-shadow:0 0 0 3px rgba(34,197,94,.15);
+  background:#fff;
+}
+.btn-load{
+  padding:10px 20px;
+  background:linear-gradient(135deg,var(--b500),var(--b700));
+  color:#fff;
+  border:none;
+  border-radius:var(--rsm);
+  font-family:'Sora',sans-serif;
+  font-size:10pt;
+  font-weight:600;
+  cursor:pointer;
+  white-space:nowrap;
+  box-shadow:0 4px 14px rgba(34,197,94,.3);
+  transition:all .2s;
+  height:40px;
+  align-self:flex-end;
+}
+.btn-load:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(34,197,94,.4);}
+.btn-clear{
+  padding:9px 16px;
+  background:transparent;
+  color:var(--b700);
+  border:1.5px solid var(--border);
+  border-radius:var(--rsm);
+  font-family:'Sora',sans-serif;
+  font-size:10pt;
+  font-weight:500;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .2s;
+  height:40px;
+  align-self:flex-end;
+}
+.btn-clear:hover{background:var(--b50);border-color:var(--b400);}
+
+/* ===== DROP PORTAL ===== */
+#drop-portal{
+  position:fixed;
+  z-index:99998;
+  display:none;
+}
+.drop-list{
+  background:#fff;
+  border:1.5px solid var(--border);
+  border-radius:var(--rsm);
+  box-shadow:0 8px 32px rgba(34,197,94,.18);
+  max-height:220px;
+  overflow-y:auto;
+  min-width:180px;
+}
+.drop-item{
+  padding:9px 14px;
+  cursor:pointer;
+  border-bottom:1px solid var(--b50);
+  transition:background .12s;
+}
+.drop-item:last-child{border-bottom:none;}
+.drop-item:hover,.drop-item.active{background:var(--b50);}
+.drop-item .di-main{font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;font-size:10pt;font-weight:700;color:var(--text);}
+.drop-item .di-sub{font-size:8.5pt;color:var(--b600);margin-top:1px;font-family:'Sora',sans-serif;}
+
+/* ===== TOAST ===== */
+#toast-container{
+  position:fixed;
+  top:20px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:99999;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  pointer-events:none;
+}
+.toast{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 18px;
+  border-radius:60px;
+  border:1.5px solid;
+  background:#fff;
+  box-shadow:0 4px 24px rgba(0,0,0,.13);
+  font-family:'Sora',sans-serif;
+  font-size:10pt;
+  pointer-events:all;
+  animation:toastIn .4s cubic-bezier(.34,1.56,.64,1) both;
+  min-width:220px;
+  max-width:480px;
+  white-space:nowrap;
+}
+.toast.success{border-color:#86efac;color:#166534;}
+.toast.error{border-color:#fca5a5;color:#991b1b;}
+.toast.info{border-color:var(--b300);color:var(--b700);}
+.toast-msg{flex:1;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;font-size:10pt;}
+.toast-close{cursor:pointer;font-size:13pt;line-height:1;opacity:.6;flex-shrink:0;background:none;border:none;color:inherit;}
+.toast-close:hover{opacity:1;}
+@keyframes toastIn{
+  from{opacity:0;transform:translateY(-18px) scale(.95);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.toast.out{animation:toastOut .3s ease forwards;}
+@keyframes toastOut{
+  to{opacity:0;transform:translateY(-12px) scale(.95);max-height:0;padding:0;margin:0;}
+}
+
+/* ===== PAGE CARD ===== */
+.page{
+  background:white;
+  width:215.9mm;
+  max-width:100%;
+  min-height:355.6mm;
+  padding:11mm 22mm 14mm 14mm;
+  box-shadow:0 25px 45px -12px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.08);
+  position:relative;
+  overflow:hidden;
+  border-radius:28px;
+  margin:0 auto;
+  transition: box-shadow 0.2s;
+}
+.page::before{
+  content:"";
+  position:absolute;
+  top:12px;
+  left:12px;
+  right:12px;
+  bottom:12px;
+  pointer-events:none;
+  border-radius:20px;
+  border:1px solid rgba(255,255,240,0.3);
+  z-index:0;
+}
+
+.bng{font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;}
+.eng{font-family:'Times New Roman',Times,serif;}
+
+/* ===== HEADER ===== */
+.header-outer{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:1px;}
+.logo-col{width:90px;flex-shrink:0;padding-left:8mm;display:flex;align-items:center;}
+.logo-wrap{width:100px;height:100px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.logo-wrap img{width:100%;height:100%;object-fit:contain;}
+.header-main-text{flex:1;text-align:center;}
+.header-right-spacer{width:76px;flex-shrink:0;}
+.header-top-line{font-size:9.5pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;margin-bottom:1px;}
+.header-office{font-size:11.5pt;font-weight:bold;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;margin-bottom:2px;}
+.header-university{font-size:16.5pt;font-weight:bold;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;margin-bottom:0;padding-bottom:2px;}
+.university-underline{border:none;border-top:2.5px solid #000;margin:3px -14mm 5px -6mm;display:block;}
+
+/* ===== FORM TITLE ===== */
+.form-title-box{text-align:center;margin:5px 0 1px 0;}
+.form-title{font-size:11.5pt;font-weight:bold;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;}
+.form-subtitle-wrap{display:inline-block;border-bottom:1px solid #000;padding-bottom:1px;margin-top:3px;}
+.form-subtitle{font-size:8.5pt;font-weight:bold;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;display:inline;line-height:1.3;}
+
+/* ===== ADDRESS BLOCK ===== */
+.addr-block{
+  margin:5px 0 2px 0;
+  font-size:10.5pt;
+  line-height:1.5;
+  font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;
+  padding-left:8mm;
+}
+.addr-block p{margin:0;}
+.bold-line{font-weight:bold;}
+
+/* ===== BODY ZONE ===== */
+.body-zone{padding-left:15mm;padding-right:15mm;}
+
+/* ===== INTRO LINE ===== */
+.intro-line{font-size:9.5pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;line-height:1.9;margin:4px 0 6px 0;}
+.inline-input{
+  border:none;
+  border-bottom:1px solid #444;
+  outline:none;
+  background:transparent;
+  font-family:'Times New Roman',Times,serif;
+  font-size:9.5pt;
+  padding:3px 2px 0 2px;
+  min-width:28px;
+  color:#111;
+  vertical-align:baseline;
+  line-height:1.6;
+  height:1.7em;
+}
+.inline-input:focus{border-bottom:1.5px solid #003399;background:#f0f5ff;}
+/* Center-aligned inline inputs (for বর্ষ, কৌশল fields) */
+.inline-input-center{
+  text-align:center;
+}
+
+/* ===== FIELD LABELS ===== */
+.field-label{font-size:10.5pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;font-weight:bold;margin:6px 0 2px 0;}
+.field-sub{display:flex;align-items:center;margin:3px 0;font-size:10.5pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;padding-left:1.5em;}
+.field-sub .label-part{white-space:nowrap;margin-right:5px;flex-shrink:0;}
+.field-sub .dotted-input{
+  flex:1;
+  border:none;
+  border-bottom:1px dotted #555;
+  outline:none;
+  background:transparent;
+  font-family:'Times New Roman',Times,serif;
+  font-size:9.5pt;
+  padding:3px 2px 0 2px;
+  color:#111;
+  line-height:1.6;
+  height:1.7em;
+}
+.field-sub .dotted-input:focus{border-bottom:1.5px solid #003399;background:#f0f5ff;}
+
+/* ===== REG ROW ===== */
+.reg-row{display:flex;align-items:baseline;gap:5px;font-size:10.5pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;margin:5px 0;flex-wrap:nowrap;width:100%;}
+.reg-label-bold{font-weight:bold;white-space:nowrap;flex-shrink:0;}
+.reg-label-mid{font-weight:bold;white-space:nowrap;flex-shrink:0;}
+.dotted-input-flex{border:none;border-bottom:1px dotted #555;outline:none;background:transparent;font-family:'Times New Roman',Times,serif;font-size:9.5pt;padding:3px 2px 0 2px;color:#111;flex:1;min-width:45px;line-height:1.6;height:1.7em;}
+.dotted-input-year{border:none;border-bottom:1px dotted #555;outline:none;background:transparent;font-family:'Times New Roman',Times,serif;font-size:9.5pt;padding:3px 2px 0 2px;color:#111;width:32px;line-height:1.6;height:1.7em;}
+.dotted-input-flex:focus,.dotted-input-year:focus{border-bottom:1.5px solid #003399;background:#f0f5ff;}
+
+/* ===== ADDRESS FIELD ROW ===== */
+.addr-field-row{display:flex;align-items:center;margin:5px 0 2px 0;font-size:9.5pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;}
+.addr-input{flex:1;border:none;border-bottom:1px dotted #555;outline:none;background:transparent;font-family:'Times New Roman',Times,serif;font-size:9.5pt;padding:3px 2px 0 2px;color:#111;line-height:1.6;height:1.7em;}
+.addr-input:focus{border-bottom:1.5px solid #003399;background:#f0f5ff;}
+.addr-row2{margin:0 0 5px 115px;}
+.addr-input2{width:100%;border:none;border-bottom:1px dotted #555;outline:none;background:transparent;font-family:'Times New Roman',Times,serif;font-size:9.5pt;padding:3px 2px 0 2px;color:#111;line-height:1.6;height:1.7em;}
+.addr-input2:focus{border-bottom:1.5px solid #003399;background:#f0f5ff;}
+
+/* ===== COURSES SECTION ===== */
+.courses-section{margin:7px 0;font-size:9.5pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;}
+.courses-section .section-title{font-weight:bold;margin-bottom:5px;font-size:10.5pt;}
+.table-indent{padding-left:1.5em;}
+.courses-table{width:100%;border-collapse:collapse;font-size:9.5pt;}
+.courses-table th{border:1px solid #333;padding:2px 8px;text-align:center;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;font-weight:bold;background:#fafafa;font-size:9.5pt;}
+.courses-table td{border:1px solid #333;padding:1px 5px;min-height:28px;height:auto;word-break:break-word;white-space:normal;vertical-align:middle;}
+.courses-table td.serial{text-align:center;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;font-size:9.5pt;width:68px;white-space:nowrap;}
+.courses-table td.course-no{width:115px;}
+.courses-table td textarea{width:100%;border:none;outline:none;background:transparent;font-family:'Times New Roman',Times,serif;font-size:9.5pt;padding:0 2px;color:#111;resize:none;overflow:hidden;display:block;line-height:1.5;min-height:22px;box-sizing:border-box;}
+.courses-table td textarea:focus{background:#f0f5ff;}
+.courses-table td input{width:100%;border:none;outline:none;background:transparent;font-family:'Times New Roman',Times,serif;font-size:9.5pt;padding:0 2px;color:#111;}
+.courses-table td input:focus{background:#f0f5ff;}
+
+/* ===== AC INPUTS (course table autocomplete) ===== */
+.ac-input{
+  width:100%;border:none;outline:none;background:transparent;
+  font-family:'Times New Roman',Times,serif !important;font-size:9.5pt !important;
+  padding:4px 5px;color:#111;line-height:1.5;min-height:26px;
+  box-sizing:border-box;display:block;resize:none;overflow:hidden;
+}
+.ac-input:focus{background:#f0fdf6;}
+
+/* ===== DECLARATION ===== */
+.declaration{margin:9px -60px 5px 0;font-size:10pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;line-height:1.7;text-align:justify;}
+.declaration .line1{display:block;padding-left:1.5em;}
+.declaration .line2{display:block;padding-left:0;}
+
+/* ===== SIGNATURE ROW ===== */
+.sig-row{display:flex;align-items:baseline;gap:7px;margin:8px 0 10px 0;font-size:10pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;}
+.sig-input{flex:1;border:none;border-bottom:1px dotted #555;outline:none;background:transparent;font-family:'Times New Roman',Times,serif;font-size:10pt;padding:3px 2px 0 2px;color:#111;line-height:1.6;height:1.7em;}
+.sig-input:focus{border-bottom:1.5px solid #003399;background:#f0f5ff;}
+
+/* ===== DIVIDERS ===== */
+.divider{border:none;border-top:1.5px solid #333;margin:10px 0;}
+
+/* ===== SECTION HEADINGS ===== */
+.section-heading{text-align:center;font-size:12pt;font-weight:bold;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;margin:6px 0 5px 0;}
+.section-body{margin:0px -60px 5px 0;font-size:10pt;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;line-height:1.7;margin-bottom:4px;text-align:justify;}
+.section-body .line1{display:block;padding-left:1.5em;}
+.section-body .line2{display:block;padding-left:0;}
+
+/* ===== AUTHORITY SIGNATURES ===== */
+.authority-sig{text-align:right;font-size:9pt;font-weight:bold;font-family:'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif;margin:20px 90px 0 0;}
+.authority-sig-dept{margin-bottom:15px;}
+
+/* ===== DOWNLOAD BUTTON ===== */
+.btn-download{
+  margin-top:24px;
+  margin-left:auto;
+  margin-right:auto;
+  padding:14px 42px;
+  background:linear-gradient(135deg,var(--b500),var(--b700));
+  color:#fff;
+  border:none;
+  border-radius:60px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Sora',sans-serif;
+  letter-spacing:.5px;
+  box-shadow:0 8px 24px rgba(34,197,94,.35);
+  transition:all .25s ease;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:fit-content;
+}
+.btn-download:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(34,197,94,.45);}
+.btn-download:active{transform:translateY(1px);}
+
+/* ===== PDF INSTRUCTION ===== */
+.pdf-instruction{
+  width:215.9mm;
+  max-width:100%;
+  background:var(--surface);
+  border-radius:var(--r);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  padding:20px 24px;
+  margin:18px auto 36px;
+  display:flex;
+  gap:18px;
+  align-items:flex-start;
+}
+.pdf-instruction .pi-icon{font-size:2rem;flex-shrink:0;margin-top:2px;}
+.pdf-instruction .pi-body{}
+.pdf-instruction .pi-title{
+  font-family:'Sora',sans-serif;
+  font-size:13pt;
+  font-weight:700;
+  color:var(--navy);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+.pdf-instruction .pi-badge{
+  font-size:8pt;
+  font-weight:600;
+  background:var(--b100);
+  color:var(--b700);
+  border-radius:20px;
+  padding:2px 10px;
+  font-family:'Sora',sans-serif;
+}
+.pdf-instruction .pi-steps{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.pdf-instruction .pi-step{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  font-family:'Sora',sans-serif;
+  font-size:10pt;
+  color:var(--tmid);
+}
+.pdf-instruction .pi-num{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:var(--b500);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9pt;
+  font-weight:700;
+  flex-shrink:0;
+  margin-top:1px;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media screen and (max-width: 820px) {
+  /* Body & layout */
+  body {
+    padding: 12px 14px;
+    align-items: stretch;
+  }
+
+  /* Page inner header */
+  .page-inner-header {
+    width: 100%;
+    padding: 12px 0 10px;
+    gap: 10px;
+    align-items: center;
+  }
+  .page-inner-header .sh-logo { height: 105px; }
+  .page-inner-header .sh-title { font-size: 1.5rem; }
+  .page-inner-header .sh-sub { font-size: 0.78rem; }
+
+  /* Loader panel */
+  .loader-panel {
+    width: calc(100% - 32px);
+    padding: 14px 14px 16px;
+    box-sizing: border-box;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+  .lp-title { font-size: 11pt; white-space: normal; }
+  .lp-row {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .lp-field { min-width: unset; width: 100%; }
+  .lp-field.sem-field { max-width: 100%; }
+  .combo-input { font-size: 11pt; padding: 11px 12px; }
+  .btn-load, .btn-clear {
+    width: 100%;
+    height: 44px;
+    font-size: 11pt;
+    align-self: stretch;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Page card */
+  .page {
+    width: calc(100% - 32px);
+    min-height: unset;
+    padding: 8mm 6mm 10mm 6mm;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    overflow-x: auto;
+    margin-left: 16px;
+    margin-right: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Header inside form */
+  .header-outer { gap: 0; flex-wrap: nowrap; }
+  .logo-col { width: 76px; padding-left: 2mm; }
+  .logo-wrap { width: 100px; height: 100px; }
+  .header-right-spacer { width: 44px; }
+  .header-top-line { font-size: 7.5pt; }
+  .header-office { font-size: 9pt; }
+  .header-university { font-size: 12pt; }
+  .university-underline { margin: 3px -5mm 4px -5mm; }
+
+  /* Form title */
+  .form-title { font-size: 9.5pt; }
+  .form-subtitle { font-size: 7.5pt; }
+
+  /* Address block */
+  .addr-block { padding-left: 3mm; font-size: 9pt; }
+
+  /* Body zone */
+  .body-zone { padding-left: 4mm; padding-right: 4mm; }
+
+  /* Intro line */
+  .intro-line { font-size: 8.5pt; line-height: 2; }
+  .inline-input { font-size: 8.5pt; height: 1.6em; min-width: 22px; }
+  .inline-input[style*="width:84px"] { width: 65px !important; }
+  .inline-input[style*="width:68px"] { width: 54px !important; }
+  .inline-input[style*="width:50px"] { width: 40px !important; }
+  .inline-input[style*="width:36px"] { width: 30px !important; }
+
+  /* Field labels */
+  .field-label { font-size: 9pt; }
+  .field-sub { font-size: 9pt; padding-left: 0.5em; }
+  .field-sub .dotted-input { font-size: 8.5pt; }
+
+  /* Reg row */
+  .reg-row {
+    flex-wrap: wrap;
+    gap: 3px 6px;
+    font-size: 9pt;
+    align-items: baseline;
+  }
+  .reg-label-bold, .reg-label-mid { font-size: 9pt; }
+  .dotted-input-flex { min-width: 38px; font-size: 8.5pt; }
+  .dotted-input-year { width: 26px; font-size: 8.5pt; }
+
+  /* Address field */
+  .addr-field-row { font-size: 9pt; }
+  .addr-field-row .label-part { font-size: 9.5pt !important; }
+  .addr-input, .addr-input2 { font-size: 8.5pt; }
+  .addr-row2 { margin-left: 0; }
+
+  /* Courses section */
+  .courses-section { font-size: 8.5pt; }
+  .courses-section .section-title { font-size: 9.5pt; }
+  .table-indent { padding-left: 0; overflow-x: auto; display: block; }
+  .courses-table { font-size: 8pt; min-width: 280px; }
+  .courses-table th { padding: 3px 5px; font-size: 8pt; }
+  .courses-table td { padding: 2px 4px; }
+  .courses-table td.serial { width: 44px; font-size: 8pt; }
+  .courses-table td.course-no { width: 80px; }
+  .courses-table td textarea,
+  .courses-table td input,
+  .ac-input { font-size: 8pt !important; }
+
+  /* Declaration */
+  .declaration {
+    margin: 6px 0 4px 0;
+    font-size: 8.5pt;
+    line-height: 1.6;
+  }
+  .declaration .line1, .declaration .line2 { padding-left: 0; }
+
+  /* Signature row */
+  .sig-row { flex-wrap: wrap; gap: 4px 8px; font-size: 9pt; }
+  .sig-input { font-size: 8.5pt; min-width: 80px; }
+
+  /* Section heading / body */
+  .section-heading { font-size: 10pt; }
+  .section-body {
+    margin: 0 0 4px 0;
+    font-size: 8.5pt;
+    line-height: 1.6;
+  }
+  .section-body .line1, .section-body .line2 { padding-left: 0; }
+  .authority-sig { margin: 14px 10px 0 0; font-size: 8pt; }
+
+  /* Download button */
+  .btn-download {
+    margin-top: 16px;
+    padding: 13px 28px;
+    font-size: 14px;
+    width: calc(100% - 32px);
+    margin-left: 16px;
+    margin-right: 16px;
+    justify-content: center;
+    border-radius: 14px;
+    box-sizing: border-box;
+  }
+
+  /* PDF instruction */
+  .pdf-instruction {
+    width: calc(100% - 32px);
+    padding: 14px 14px;
+    margin-top: 14px;
+    margin-bottom: 20px;
+    margin-left: 16px;
+    margin-right: 16px;
+    gap: 12px;
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+  }
+  .pdf-instruction .pi-title { font-size: 11pt; flex-wrap: wrap; }
+  .pdf-instruction .pi-step { font-size: 9pt; }
+
+  /* Toast — 80% width, wrap text */
+  .toast {
+    max-width: 80vw;
+    min-width: unset;
+    white-space: normal;
+    word-break: break-word;
+    border-radius: 16px;
+    align-items: flex-start;
+  }
+  .toast-msg { white-space: normal; word-break: break-word; }
+
+  /* Drop portal */
+  .drop-list { min-width: 140px; }
+  .drop-item { padding: 10px 12px; }
+  .drop-item .di-main { font-size: 9.5pt; }
+  .drop-item .di-sub { font-size: 8pt; }
+}
+
+@media screen and (max-width: 480px) {
+  body { padding: 0; }
+
+  .page-inner-header { gap: 8px; padding: 10px 10px 8px; align-items: center; }
+  .instructions-pill { font-size: 12px; padding: 7px 16px; }
+  .page-inner-header .sh-logo { height: 90px; }
+  .page-inner-header .sh-title { font-size: 1.25rem; }
+  .page-inner-header .sh-sub { font-size: 0.72rem; }
+
+  .loader-panel { padding: 12px 10px 14px; }
+  .lp-title { font-size: 10pt; }
+
+  .page { padding: 6mm 5mm 8mm 5mm; border-radius: 12px; }
+
+  .logo-col { width: 62px; padding-left: 1mm; }
+  .logo-wrap { width: 100px; height: 100px; }
+  .header-right-spacer { width: 36px; }
+  .header-top-line { font-size: 6.5pt; }
+  .header-office { font-size: 7.5pt; }
+  .header-university { font-size: 10pt; }
+
+  .form-title { font-size: 8.5pt; }
+  .form-subtitle { font-size: 7pt; }
+
+  .intro-line { font-size: 8pt; }
+  .field-label { font-size: 8pt; }
+  .field-sub { font-size: 8pt; }
+
+  .reg-row { font-size: 8pt; }
+  .reg-label-bold, .reg-label-mid { font-size: 8pt; }
+
+  .courses-table { font-size: 7.5pt; min-width: 250px; }
+  .courses-table th { font-size: 7.5pt; }
+  .courses-table td.serial { width: 36px; }
+  .courses-table td.course-no { width: 68px; }
+
+  .declaration { font-size: 8pt; }
+  .sig-row { font-size: 8pt; }
+  .section-heading { font-size: 9pt; }
+  .section-body { font-size: 8pt; }
+  .authority-sig { font-size: 7.5pt; }
+
+  .btn-download { font-size: 13px; padding: 12px 20px; }
+  .pdf-instruction .pi-icon { font-size: 1.5rem; }
+  .pdf-instruction .pi-title { font-size: 10pt; }
+  .pdf-instruction .pi-step { font-size: 8.5pt; }
+
+  .toast {
+    max-width: 80vw;
+    min-width: unset;
+    white-space: normal;
+    word-break: break-word;
+    border-radius: 14px;
+    align-items: flex-start;
+    font-size: 9pt;
+    padding: 10px 14px;
+  }
+  .toast-msg { white-space: normal; word-break: break-word; }
+}
+
+/* ===== INFO BUTTON ===== */
+/* ===== INSTRUCTIONS PILL (replaces info-btn) ===== */
+.instructions-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--surface,#fff);
+  color:var(--navy,#1a3a6b);
+  border:1.5px solid var(--border,rgba(0,0,0,0.1));
+  border-radius:25px;
+  padding:8px 20px;
+  cursor:pointer;
+  font-family:'Sora',sans-serif;
+  font-size:13px;font-weight:600;
+  letter-spacing:.3px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+  transition:all .22s;
+  user-select:none;
+}
+[data-theme="dark"] .instructions-pill{
+  background:var(--surface2,#1e293b);
+  color:var(--navy,#86efac);
+  border-color:var(--border,rgba(134,239,172,0.2));
+  box-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+.instructions-pill:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 20px rgba(37,99,235,.15);
+}
+[data-theme="dark"] .instructions-pill:hover{
+  box-shadow:0 6px 20px rgba(134,239,172,.12);
+}
+
+/* ===== INFO OVERLAY & MODAL ===== */
+.info-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9100;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s;
+}
+.info-overlay.open{
+  opacity:1;
+  pointer-events:all;
+}
+.info-modal{
+  background:var(--surface);
+  border-radius:22px;
+  width:100%;
+  max-width:480px;
+  max-height:68vh;
+  overflow-y:auto;
+  padding:24px 24px 20px;
+  position:relative;
+  box-shadow:0 24px 64px rgba(0,0,0,.22);
+  transform:translateY(18px) scale(.97);
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1);
+  border:1.5px solid var(--border);
+  scrollbar-width:thin;
+  scrollbar-color:var(--b300) transparent;
+}
+.info-overlay.open .info-modal{
+  transform:translateY(0) scale(1);
+}
+
+/* Close button */
+.info-close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:1.5px solid var(--border2);
+  background:var(--b50);
+  color:var(--tmid);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all .18s;
+  padding:0;
+}
+.info-close:hover{ background:var(--b100); color:var(--navy); }
+.info-close svg{ width:16px; height:16px; }
+
+/* Modal header */
+/* Sections */
+.info-section{
+  margin-bottom:20px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--border2);
+}
+.info-section:last-of-type{ border-bottom:none; margin-bottom:8px; }
+.info-section-title{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-family:'Sora',sans-serif;
+  font-size:0.82rem;
+  font-weight:700;
+  color:var(--b700);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin-bottom:10px;
+}
+.info-section-title svg{ width:15px; height:15px; flex-shrink:0; }
+
+/* Features list */
+.info-features{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.info-features li{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  font-family:'Sora',sans-serif;
+  font-size:0.83rem;
+  color:var(--tmid);
+  line-height:1.55;
+}
+.feat-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--b500);
+  flex-shrink:0;
+  margin-top:5px;
+}
+
+/* Steps */
+.info-steps{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+}
+.info-steps li{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  font-family:'Sora',sans-serif;
+  font-size:0.83rem;
+  color:var(--tmid);
+  line-height:1.55;
+}
+.info-steps li strong{ color:var(--navy); }
+.step-num{
+  min-width:22px;
+  height:22px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--b500),var(--b700));
+  color:#fff;
+  font-family:'Sora',sans-serif;
+  font-size:0.7rem;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  margin-top:1px;
+}
+
+/* Hide in print */
+@media print{
+  .instructions-pill{ display:none!important; }
+  .info-overlay{ display:none!important; }
+}
+
+/* ===== PRINT OVERRIDES ===== */
+@media print{
+  @page{size:legal portrait;margin:10mm 12mm 10mm 12mm;}
+  html,body{background:#fff!important;color:#111!important;padding:0!important;margin:0!important;}
+  html,body,body *{color:#111!important;background:transparent!important;}
+  #fk-header,#fk-footer,.site-header,.site-footer,
+  .sidebar-overlay,.mobile-sidebar,
+  .page-inner-header,.loader-panel,
+  .btn-download,.pdf-instruction,
+  #toast-container,#drop-portal,
+  .info-overlay,.instructions-pill{display:none!important;}
+  .page{
+    box-shadow:none!important;
+    width:100%!important;
+    min-height:unset!important;
+    padding:0!important;
+    margin:0!important;
+    border-radius:0!important;
+    background:#fff!important;
+    color:#111!important;
+    border:none!important;
+  }
+  .page::before{display:none;}
+  .page *{color:#111!important;background:transparent!important;}
+  input.dotted-input,input.addr-input,input.addr-input2,input.sig-input,input.dotted-input-flex,input.dotted-input-year,input.inline-input{
+    border-bottom:1px dotted #555!important;
+    background:transparent!important;
+    color:#111!important;
+    padding-top:5px!important;
+  }
+  .courses-table td textarea{border:none!important;background:transparent!important;color:#111!important;resize:none!important;}
+  .courses-table td input{border:none!important;background:transparent!important;color:#111!important;padding-top:0!important;}
+  .courses-table th{padding-top:0px!important;padding-bottom:0px!important;}
+  .courses-table td{padding-top:0px!important;padding-bottom:0px!important;}
+  .university-underline{margin:-13px -12mm 5px -12mm;}
+}
+</style>
+</head>
+<body>
+
+<!-- Shared Header -->
+<div id="fk-header"></div>
+
+
+<div id="drop-portal"></div>
+<div id="toast-container" style="top:calc(68px + 20px) !important;"></div>
+
+<!-- ===== INFO MODAL ===== -->
+<div class="info-overlay" id="info-overlay">
+  <div class="info-modal" id="info-modal" role="dialog" aria-modal="true" aria-label="Instructions">
+    <button class="info-close" id="info-close" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="info-section">
+      <div class="info-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Features
+      </div>
+      <ul class="info-features">
+        <li><span class="feat-dot"></span>Department-aware course database for all RUET departments</li>
+        <li><span class="feat-dot"></span>Auto-fill courses by year &amp; semester with a single click</li>
+        <li><span class="feat-dot"></span>Smart autocomplete search in the course table</li>
+        <li><span class="feat-dot"></span>Bilingual form — Bangla text with English course codes</li>
+        <li><span class="feat-dot"></span>Print-ready layout matching the official RUET exam form</li>
+        <li><span class="feat-dot"></span>Fully mobile responsive — works on any device</li>
+        <li><span class="feat-dot"></span>No login, no data sent — everything stays on your device</li>
+      </ul>
+    </div>
+
+    <div class="info-section">
+      <div class="info-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        How to Use
+      </div>
+      <ol class="info-steps">
+        <li><span class="step-num">1</span><span>Choose your <strong>Department</strong> from the dropdown.</span></li>
+        <li><span class="step-num">2</span><span>Select your <strong>Year &amp; Semester</strong>.</span></li>
+        <li><span class="step-num">3</span><span>Click <strong>"কোর্স লোড করুন"</strong> to auto-fill all courses.</span></li>
+        <li><span class="step-num">4</span><span>Fill in your personal details in the form fields.</span></li>
+        <li><span class="step-num">5</span><span>Click <strong>"Print / Save as PDF"</strong> to download or print.</span></li>
+      </ol>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== PAGE INNER HEADER (logo + title, replaces old site-header) ===== -->
+<div class="page-inner-header">
+  <img src="c-logo.png" alt="Logo" class="sh-logo" onerror="this.style.display='none'">
+  <div class="sh-text">
+    <div class="sh-title">Exam Form <span>Generator</span></div>
+    <div class="sh-sub">Department-aware · Auto-fill Courses · PDF Ready</div>
+  </div>
+  <div style="display:flex;justify-content:center;margin-top:2px;">
+    <div class="instructions-pill" id="info-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8.5"/><line x1="12" y1="11" x2="12" y2="16"/></svg>
+      Instructions
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOADER PANEL ===== -->
+<div class="loader-panel">
+  <div class="lp-header">
+    <span class="lp-title">বিভাগ ও সেমিস্টার নির্বাচন করে কোর্স লোড করুন</span>
+    <span class="lp-line"></span>
+  </div>
+  <div class="lp-row">
+    <div class="lp-field">
+      <label class="lp-label">বিভাগ (Department)</label>
+      <input id="inp-dept" class="combo-input" type="text" placeholder="বিভাগ খুঁজুন…" autocomplete="off">
+    </div>
+    <div class="lp-field sem-field">
+      <label class="lp-label">বর্ষ ও সেমিস্টার</label>
+      <input id="inp-sem" class="combo-input" type="text" placeholder="সেমিস্টার খুঁজুন…" autocomplete="off">
+    </div>
+    <button class="btn-load" id="btn-load">📋 কোর্স লোড করুন</button>
+    <button class="btn-clear" id="btn-clear">✕ Clear</button>
+  </div>
+</div>
+
+<!-- ===== PAGE CARD ===== -->
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header-outer">
+    <div class="logo-col">
+      <div class="logo-wrap">
+        <img src="logo.png" alt="RUET Logo"
+          onerror="this.parentNode.innerHTML='<div style=\'font-size:7pt;color:#666;font-family:serif;text-align:center;line-height:1.4;\'>RUET<br>LOGO</div>';">
+      </div>
+    </div>
+    <div class="header-main-text">
+      <div class="header-top-line bng">ঐশী জ্যোতিই আমাদের পথ প্রদর্শক</div>
+      <div class="header-office bng">পরীক্ষা নিয়ন্ত্রকের কার্যালয়</div>
+      <div class="header-university bng">রাজশাহী প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয়</div>
+    </div>
+    <div class="header-right-spacer"></div>
+  </div>
+  <hr class="university-underline">
+
+  <!-- FORM TITLE -->
+  <div class="form-title-box">
+    <div class="form-title bng">বি.এস-সি. ইঞ্জিনিয়ারিং পরীক্ষায় অংশ গ্রহণের আবেদনপত্র</div>
+    <div class="form-subtitle-wrap">
+      <span class="form-subtitle bng">(ফরমের ১ম অংশ ছাত্র, ২য় অংশ বিভাগীয় প্রধানের অফিস এবং ৩য় অংশ পরীক্ষা নিয়ন্ত্রকের অফিস পূরণ করিবে)</span>
+    </div>
+  </div>
+
+  <!-- ADDRESSING -->
+  <div class="addr-block">
+    <p class="bng bold-line">বরাবর,</p>
+    <p class="bng">পরীক্ষা নিয়ন্ত্রক,</p>
+    <p class="bng">রাজশাহী প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয় ।</p>
+    <p class="bng bold-line" style="margin-top:3px;">জনাব,</p>
+  </div>
+
+  <!-- BODY ZONE -->
+  <div class="body-zone">
+
+    <!-- INTRO LINE -->
+    <!-- Fields: year (left-aligned), then বর্ষ field (center), কৌশল field (center), last field (center) -->
+    <div class="intro-line bng">
+      ২০<input class="inline-input eng" style="width:36px;" type="text" oninput="mixedFont(this)">
+      সালের বি.এস-সি ইঞ্জিনিয়ারিং<input class="inline-input eng inline-input-center" style="width:84px;" type="text" oninput="mixedFont(this)">বর্ষ<input class="inline-input eng inline-input-center" style="width:50px;" type="text" oninput="mixedFont(this)">
+      কৌশল<input class="inline-input eng inline-input-center" style="width:68px;" type="text" oninput="mixedFont(this)"> সেমিস্টার/ব্যাকলগ/শর্ট
+      সেমিস্টার পরীক্ষায় নিয়মিত/অনিয়মিত পরীক্ষার্থী রূপে অংশ গ্রহণের অনুমতি প্রদানের জন্য আপনার নিকট সবিনয় আবেদন করিতেছি।
+    </div>
+
+    <!-- FIELD 1 -->
+    <div class="field-label bng">১। পরীক্ষার্থীর পূর্ণ নাম স্পষ্টাক্ষরে (এস.এস.সি সার্টিফিকেট অনুসারে) ঃ</div>
+    <div class="field-sub">
+      <span class="label-part bng">বাংলা ঃ</span>
+      <input class="dotted-input bng" type="text" oninput="mixedFont(this)">
+    </div>
+    <div class="field-sub">
+      <span class="label-part bng">ইংরেজী ঃ</span>
+      <input class="dotted-input eng" type="text" oninput="mixedFont(this)">
+    </div>
+
+    <!-- FIELD 2 -->
+    <div class="field-label bng">২। পিতার নাম ঃ</div>
+    <div class="field-sub">
+      <span class="label-part bng">বাংলা ঃ</span>
+      <input class="dotted-input bng" type="text" oninput="mixedFont(this)">
+    </div>
+    <div class="field-sub">
+      <span class="label-part bng">ইংরেজী ঃ</span>
+      <input class="dotted-input eng" type="text" oninput="mixedFont(this)">
+    </div>
+
+    <!-- FIELD 3 -->
+    <div class="reg-row">
+      <span class="reg-label-bold bng">৩। নিবন্ধন সংখ্যা ঃ</span>
+      <input class="dotted-input-flex eng" type="text" oninput="mixedFont(this)">
+      <span class="reg-label-mid bng">শিক্ষা বর্ষ ঃ ২০</span>
+      <input class="dotted-input-year eng" type="text" oninput="mixedFont(this)">
+      <span class="reg-label-mid bng">- ২০</span>
+      <input class="dotted-input-year eng" type="text" oninput="mixedFont(this)">
+      <span class="reg-label-mid bng">রোল নং</span>
+      <input class="dotted-input-flex eng" type="text" oninput="mixedFont(this)">
+    </div>
+
+    <!-- FIELD 4 -->
+    <div class="addr-field-row">
+      <span class="label-part bng" style="font-weight:bold;white-space:nowrap;font-size:11pt;flex-shrink:0;margin-right:5px;">৪। বর্তমান ঠিকানা ঃ</span>
+      <input class="addr-input eng" type="text" oninput="mixedFont(this)">
+    </div>
+    <div class="addr-row2">
+      <input class="addr-input2 eng" type="text" oninput="mixedFont(this)">
+    </div>
+
+    <!-- FIELD 5: Course table -->
+    <div class="courses-section">
+      <div class="section-title bng">৫। যে বিষয় সমূহে পরীক্ষা দিতে ইচ্ছুক ঃ</div>
+      <div class="table-indent">
+        <table class="courses-table">
+          <thead>
+            <tr>
+              <th class="bng">ক্রম নং</th>
+              <th class="bng">কোর্স নং</th>
+              <th class="bng">কোর্সের শিরোনাম</th>
+            </tr>
+          </thead>
+          <tbody id="course-tbody">
+            <!-- Built by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DECLARATION -->
+    <div class="declaration bng">
+      <span class="line1">আমি অঙ্গীকার করিতেছি যে, যদি আমার প্রদত্ত তথ্যাবলী অসত্য প্রমাণিত হয় অথবা এই পরীক্ষায় আমার অংশ গ্রহণের ব্যাপারে</span>
+      <span class="line2">কোন আপত্তি উত্থাপিত হয়, তাহা হইলে বিশ্ববিদ্যালয় কর্তৃপক্ষের সিদ্ধান্ত মানিয়া লইব।</span>
+    </div>
+
+    <!-- SIGNATURE ROW -->
+    <div class="sig-row">
+      <span class="bng" style="white-space:nowrap;">তারিখ ঃ</span>
+      <input class="sig-input eng" type="text" style="max-width:110px;flex:none;" oninput="mixedFont(this)">
+      <span class="bng" style="white-space:nowrap;margin-left:6px;">পরীক্ষার্থীর পূর্ণ স্বাক্ষর ঃ</span>
+      <input class="sig-input eng" type="text" oninput="mixedFont(this)">
+    </div>
+
+  </div><!-- end body-zone -->
+
+  <hr class="divider">
+
+  <!-- DEPARTMENTAL SECTION -->
+  <div class="section-heading bng">বিভাগীয় প্রধানের অফিস পূরণ করিবে</div>
+  <div class="body-zone">
+    <div class="section-body bng">
+      <span class="line1">আমি নিশ্চয়তা প্রদান করিতেছি যে, উপরোল্লিখিত পরীক্ষার্থীর তত্ত্বীয়/ব্যবহারিক ক্লাস সম্পর্কে যথাযথ ব্যবস্থা গৃহীত হইয়াছে। তাহাকে</span>
+      <span class="line2">উল্লেখিত পরীক্ষায় অংশ গ্রহণের জন্য সুপারিশ করা হইল / হইল না।</span>
+    </div>
+  </div>
+  <div class="authority-sig authority-sig-dept bng">বিভাগীয় প্রধান</div>
+
+  <hr class="divider">
+
+  <!-- CONTROLLER SECTION -->
+  <div class="section-heading bng">পরীক্ষা নিয়ন্ত্রকের অফিস পূরণ করিবে</div>
+  <div class="body-zone">
+    <div class="section-body bng">
+      <span class="line2">উপরোক্ত ছাত্র/ছাত্রীকে পরীক্ষায় অংশ গ্রহণের অনুমতি প্রদান করা হইল / হইল না।</span>
+    </div>
+  </div>
+  <div class="authority-sig bng">পরীক্ষা নিয়ন্ত্রক</div>
+
+</div><!-- end .page -->
+
+<!-- DOWNLOAD BUTTON -->
+<button class="btn-download" onclick="downloadPDF()">🖨️ Print / Save as PDF</button>
+
+<!-- PDF INSTRUCTION -->
+<div class="pdf-instruction">
+  <span class="pi-icon">📄</span>
+  <div class="pi-body">
+    <div class="pi-title">
+      How to save as Legal-size PDF
+      <span class="pi-badge">Mobile &amp; Desktop</span>
+    </div>
+    <div class="pi-steps">
+      <div class="pi-step"><div class="pi-num">1</div><span>Tap <strong>Print / Save as PDF</strong> — the print dialog will open.</span></div>
+      <div class="pi-step"><div class="pi-num">2</div><span>Look for <strong>Paper size</strong> or <strong>Page size</strong> in the settings panel.</span></div>
+      <div class="pi-step"><div class="pi-num">3</div><span>Change it to <strong>Legal (8.5 × 14 in)</strong> — do this before saving.</span></div>
+      <div class="pi-step"><div class="pi-num">4</div><span>Select <strong>Save as PDF</strong> as the destination, then tap <strong>Save</strong>.</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   HELPERS
+============================================================ */
+const BANGLA_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯','১০','১১'];
+
+function toBanglaSerial(n){
+  return '('+BANGLA_DIGITS[n]+')';
+}
+
+function isBangla(str){
+  return /[\u0980-\u09FF]/.test(str);
+}
+
+function mixedFont(inp){
+  if(!inp.value){ inp.style.fontFamily=''; return; }
+  inp.style.fontFamily = isBangla(inp.value)
+    ? "'SolaimanLipi','Noto Sans Bengali','Vrinda',sans-serif"
+    : "'Times New Roman',Times,serif";
+}
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=el.scrollHeight+'px';
+}
+
+/* ============================================================
+   TOAST SYSTEM
+============================================================ */
+function showToast(message, type='info', duration=4000){
+  const container = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className='toast '+type;
+  t.innerHTML=`<span class="toast-msg">${message}</span><button class="toast-close" onclick="dismissToast(this.parentNode)">✕</button>`;
+  container.appendChild(t);
+  if(duration>0) setTimeout(()=>dismissToast(t), duration);
+}
+
+function dismissToast(el){
+  if(!el||!el.parentNode) return;
+  el.classList.add('out');
+  setTimeout(()=>{ if(el.parentNode) el.parentNode.removeChild(el); }, 320);
+}
+
+/* ============================================================
+   DROP PORTAL (shared combo engine)
+============================================================ */
+const portal = document.getElementById('drop-portal');
+let portalActiveInput = null;
+let portalItems = [];
+let portalActiveIdx = -1;
+let portalOnSelect = null;
+
+function openPortal(inputEl, items, onSelect){
+  portalActiveInput = inputEl;
+  portalItems = items;
+  portalActiveIdx = -1;
+  portalOnSelect = onSelect;
+  renderPortal();
+  positionPortal(inputEl);
+  portal.style.display='block';
+}
+
+function renderPortal(){
+  const list = document.createElement('div');
+  list.className='drop-list';
+  portalItems.forEach((item,i)=>{
+    const d = document.createElement('div');
+    d.className='drop-item'+(i===portalActiveIdx?' active':'');
+    d.innerHTML=`<div class="di-main">${item.label}</div>${item.sub?`<div class="di-sub">${item.sub}</div>`:''}`;
+    d.addEventListener('mousedown',(e)=>{
+      e.preventDefault();
+      portalOnSelect(item);
+      closePortal();
+    });
+    list.appendChild(d);
+  });
+  portal.innerHTML='';
+  portal.appendChild(list);
+}
+
+function positionPortal(inputEl){
+  const r = inputEl.getBoundingClientRect();
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let left = r.left;
+  let top  = r.bottom + 4;
+  let width = Math.max(r.width, 200);
+  // Clamp so it doesn't overflow the right edge
+  if(left + width > vw - 8) left = Math.max(8, vw - width - 8);
+  // If dropdown would go off bottom, open upward
+  const listH = Math.min(220, portalItems.length * 46);
+  if(top + listH > vh - 8 && r.top > listH) top = r.top - listH - 4;
+  portal.style.left = left+'px';
+  portal.style.top  = top+'px';
+  portal.style.width = width+'px';
+  portal.style.maxWidth = (vw - 16)+'px';
+}
+
+function closePortal(){
+  portal.style.display='none';
+  portal.innerHTML='';
+  portalActiveInput=null;
+  portalItems=[];
+  portalActiveIdx=-1;
+}
+
+function navigatePortal(dir){
+  if(!portalItems.length) return;
+  portalActiveIdx = Math.max(0, Math.min(portalItems.length-1, portalActiveIdx+dir));
+  renderPortal();
+}
+
+function selectActivePortal(){
+  if(portalActiveIdx>=0 && portalActiveIdx<portalItems.length){
+    portalOnSelect(portalItems[portalActiveIdx]);
+    closePortal();
+    return true;
+  }
+  return false;
+}
+
+document.addEventListener('click',(e)=>{
+  if(!portal.contains(e.target) && e.target!==portalActiveInput) closePortal();
+});
+// On mobile: track touch start position to distinguish scroll from tap
+let _touchStartY = 0;
+let _touchStartX = 0;
+portal.addEventListener('touchstart',(e)=>{
+  _touchStartY = e.touches[0].clientY;
+  _touchStartX = e.touches[0].clientX;
+  // Do NOT preventDefault here — allow native scrolling of the list
+}, { passive: true });
+portal.addEventListener('touchend',(e)=>{
+  const dy = Math.abs(e.changedTouches[0].clientY - _touchStartY);
+  const dx = Math.abs(e.changedTouches[0].clientX - _touchStartX);
+  // Only treat as a tap if finger barely moved (not a scroll gesture)
+  if(dy > 8 || dx > 8) return;
+  const item = e.target.closest('.drop-item');
+  if(item){
+    e.preventDefault(); // prevent ghost click only on actual tap
+    const idx = Array.from(portal.querySelectorAll('.drop-item')).indexOf(item);
+    if(idx>=0 && idx<portalItems.length){
+      portalOnSelect(portalItems[idx]);
+      closePortal();
+    }
+  }
+});
+
+/* ============================================================
+   DATA
+============================================================ */
+let db = { departments: [], courses: [] };
+let selectedDept = '';
+let selectedSem  = '';
+
+const SEMESTERS = [
+  { label:'1st Year · Odd Sem',  sub:'1st Semester',  value:'11' },
+  { label:'1st Year · Even Sem', sub:'2nd Semester',  value:'12' },
+  { label:'2nd Year · Odd Sem',  sub:'3rd Semester',  value:'21' },
+  { label:'2nd Year · Even Sem', sub:'4th Semester',  value:'22' },
+  { label:'3rd Year · Odd Sem',  sub:'5th Semester',  value:'31' },
+  { label:'3rd Year · Even Sem', sub:'6th Semester',  value:'32' },
+  { label:'4th Year · Odd Sem',  sub:'7th Semester',  value:'41' },
+  { label:'4th Year · Even Sem', sub:'8th Semester',  value:'42' },
+  { label:'5th Year · Odd Sem',  sub:'9th Semester',  value:'51' },
+  { label:'5th Year · Even Sem', sub:'10th Semester', value:'52' },
+];
+
+function semKey(code){
+  const m = code.match(/(\d)(\d)\d{2}/);
+  return m ? m[1]+m[2] : '';
+}
+
+async function initDB(){
+  try{
+    const res = await fetch('courses.json');
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    db = await res.json();
+  } catch(e){
+    db = { departments:[], courses:[] };
+    showToast('⚠ courses.json লোড হয়নি — ম্যানুয়ালি কোর্স লিখুন', 'error', 0);
+  }
+}
+
+/* ============================================================
+   COMBO FIELDS (dept + semester)
+============================================================ */
+function setupCombo(inputEl, getItems, onSelect){
+  inputEl.addEventListener('focus',()=>showComboList(inputEl, getItems, onSelect));
+  inputEl.addEventListener('input',()=>showComboList(inputEl, getItems, onSelect));
+  inputEl.addEventListener('keydown',(e)=>{
+    if(e.key==='ArrowDown'){e.preventDefault();navigatePortal(1);}
+    else if(e.key==='ArrowUp'){e.preventDefault();navigatePortal(-1);}
+    else if(e.key==='Enter'){e.preventDefault();if(!selectActivePortal()) closePortal();}
+    else if(e.key==='Escape') closePortal();
+  });
+  inputEl.addEventListener('blur',()=>setTimeout(closePortal,160));
+}
+
+function showComboList(inputEl, getItems, onSelect){
+  const q = inputEl.value.toLowerCase();
+  const items = getItems().filter(it=>(it.label+' '+it.sub).toLowerCase().includes(q));
+  if(!items.length){ closePortal(); return; }
+  openPortal(inputEl, items, onSelect);
+}
+
+/* Dept combo */
+const inpDept = document.getElementById('inp-dept');
+setupCombo(inpDept,
+  ()=>db.departments.map(d=>({ label: d.fullName, sub: d.title, value: d.code })),
+  (item)=>{ selectedDept=item.value; inpDept.value=item.label; }
+);
+
+/* Semester combo */
+const inpSem = document.getElementById('inp-sem');
+setupCombo(inpSem,
+  ()=>SEMESTERS.map(s=>({ label:s.label, sub:s.sub, value:s.value })),
+  (item)=>{ selectedSem=item.value; inpSem.value=item.label+' ('+item.sub+')'; }
+);
+
+/* ============================================================
+   LOAD COURSES BUTTON
+============================================================ */
+document.getElementById('btn-load').addEventListener('click',()=>{
+  if(!selectedDept){ showToast('বিভাগ নির্বাচন করুন','error'); return; }
+  if(!selectedSem){  showToast('সেমিস্টার নির্বাচন করুন','error'); return; }
+  if(!db.courses.length){ showToast('courses.json লোড হয়নি','error'); return; }
+
+  const filtered = db.courses.filter(c=>{
+    return c.dept===selectedDept && semKey(c.code)===selectedSem;
+  });
+
+  const tbody = document.getElementById('course-tbody');
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach((row,i)=>{
+    const codeInput = row.querySelector('[data-field="code"]');
+    const nameInput = row.querySelector('[data-field="name"]');
+    if(!codeInput||!nameInput) return;
+    const course = filtered[i];
+    if(course){
+      codeInput.value = course.code;
+      nameInput.value = course.title;
+    } else {
+      codeInput.value='';
+      nameInput.value='';
+    }
+    autoResize(nameInput);
+  });
+
+  const semObj = SEMESTERS.find(s=>s.value===selectedSem);
+  const semLabel = semObj ? semObj.label+' ('+semObj.sub+')' : selectedSem;
+  showToast('✓ '+filtered.length+'টি কোর্স লোড হয়েছে — '+semLabel, 'success');
+});
+
+/* ============================================================
+   CLEAR BUTTON
+============================================================ */
+document.getElementById('btn-clear').addEventListener('click',()=>{
+  const tbody = document.getElementById('course-tbody');
+  tbody.querySelectorAll('.ac-input').forEach(el=>{
+    el.value='';
+    if(el.tagName==='TEXTAREA') autoResize(el);
+  });
+  showToast('কোর্স টেবিল পরিষ্কার হয়েছে','info');
+});
+
+/* ============================================================
+   BUILD TABLE ROWS
+============================================================ */
+function buildTableRows(n){
+  const tbody = document.getElementById('course-tbody');
+  tbody.innerHTML='';
+  for(let i=1;i<=n;i++){
+    const tr = document.createElement('tr');
+
+    // Serial cell
+    const tdS = document.createElement('td');
+    tdS.className='serial bng';
+    tdS.textContent=toBanglaSerial(i);
+    tr.appendChild(tdS);
+
+    // Course code cell
+    const tdC = document.createElement('td');
+    tdC.className='course-no';
+    const codeInp = document.createElement('input');
+    codeInp.type='text';
+    codeInp.className='ac-input';
+    codeInp.dataset.row=String(i);
+    codeInp.dataset.field='code';
+    setupAC(codeInp);
+    tdC.appendChild(codeInp);
+    tr.appendChild(tdC);
+
+    // Course title cell
+    const tdT = document.createElement('td');
+    tdT.className='course-title';
+    const nameTA = document.createElement('textarea');
+    nameTA.className='ac-input';
+    nameTA.dataset.row=String(i);
+    nameTA.dataset.field='name';
+    nameTA.rows=1;
+    nameTA.addEventListener('input',()=>autoResize(nameTA));
+    setupAC(nameTA);
+    tdT.appendChild(nameTA);
+    tr.appendChild(tdT);
+
+    tbody.appendChild(tr);
+  }
+}
+
+/* ============================================================
+   AUTOCOMPLETE FOR TABLE ROWS
+============================================================ */
+function setupAC(inputEl){
+  inputEl.addEventListener('focus',()=>showACList(inputEl));
+  inputEl.addEventListener('input',()=>showACList(inputEl));
+  inputEl.addEventListener('keydown',(e)=>{
+    if(e.key==='ArrowDown'){e.preventDefault();navigatePortal(1);}
+    else if(e.key==='ArrowUp'){e.preventDefault();navigatePortal(-1);}
+    else if(e.key==='Enter'){e.preventDefault();selectActivePortal();}
+    else if(e.key==='Escape') closePortal();
+  });
+  inputEl.addEventListener('blur',()=>setTimeout(closePortal,160));
+}
+
+function showACList(inputEl){
+  const q = inputEl.value.toLowerCase().trim();
+  if(!q){ closePortal(); return; }
+  const field = inputEl.dataset.field;
+  const row   = inputEl.dataset.row;
+
+  let pool = db.courses;
+  if(selectedDept) pool = pool.filter(c=>c.dept===selectedDept);
+
+  let items;
+  if(field==='code'){
+    items = pool
+      .filter(c=>c.code.toLowerCase().includes(q))
+      .map(c=>({ label:c.code, sub:c.title, _code:c.code, _title:c.title, _row:row }));
+  } else {
+    items = pool
+      .filter(c=>c.title.toLowerCase().includes(q)||c.code.toLowerCase().includes(q))
+      .map(c=>({ label:c.title, sub:c.code, _code:c.code, _title:c.title, _row:row }));
+  }
+
+  if(!items.length){ closePortal(); return; }
+  openPortal(inputEl, items.slice(0,12), (item)=>{
+    fillRow(item._row, item._code, item._title);
+  });
+}
+
+function fillRow(row, code, title){
+  const tbody = document.getElementById('course-tbody');
+  const codeInp = tbody.querySelector(`[data-row="${row}"][data-field="code"]`);
+  const nameTA  = tbody.querySelector(`[data-row="${row}"][data-field="name"]`);
+  if(codeInp) codeInp.value=code;
+  if(nameTA){ nameTA.value=title; autoResize(nameTA); }
+}
+
+/* ============================================================
+   PRINT / PDF
+============================================================ */
+let _printStyle = null;
+
+window.addEventListener('beforeprint',()=>{
+  // Inject page-size style
+  _printStyle = document.createElement('style');
+  _printStyle.id='_print_page_size';
+  _printStyle.textContent='@page{size:215.9mm 355.6mm portrait;margin:10mm 14mm 10mm 14mm;}';
+  document.head.appendChild(_printStyle);
+
+  // Swap textareas to divs for correct print height
+  const tbody = document.getElementById('course-tbody');
+  tbody.querySelectorAll('textarea.ac-input').forEach(ta=>{
+    const div = document.createElement('div');
+    div.className='ac-input';
+    div.style.minHeight = ta.scrollHeight+'px';
+    div.textContent = ta.value;
+    div.dataset.printReplace='1';
+    ta.dataset.printHidden='1';
+    ta.style.display='none';
+    ta.parentNode.insertBefore(div, ta);
+  });
+});
+
+window.addEventListener('afterprint',()=>{
+  // Remove injected style
+  if(_printStyle){ _printStyle.parentNode.removeChild(_printStyle); _printStyle=null; }
+
+  // Restore textareas
+  const tbody = document.getElementById('course-tbody');
+  tbody.querySelectorAll('[data-print-replace]').forEach(div=>{
+    const ta = div.nextSibling;
+    if(ta && ta.dataset && ta.dataset.printHidden){
+      ta.style.display='';
+      delete ta.dataset.printHidden;
+    }
+    div.parentNode.removeChild(div);
+  });
+});
+
+function downloadPDF(){
+  window.print();
+}
+
+/* ============================================================
+   INFO MODAL
+============================================================ */
+(function(){
+  const btn     = document.getElementById('info-btn');
+  const overlay = document.getElementById('info-overlay');
+  const closeBtn= document.getElementById('info-close');
+
+  function openModal(){
+    overlay.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeModal(){
+    overlay.classList.remove('open');
+    document.body.style.overflow='';
+  }
+
+  btn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click',(e)=>{ if(e.target===overlay) closeModal(); });
+  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeModal(); });
+
+  // Touch: prevent modal scroll from propagating to body on mobile
+  document.getElementById('info-modal').addEventListener('touchmove',(e)=>{
+    e.stopPropagation();
+  },{ passive:true });
+})();
+
+/* ============================================================
+   INIT
+============================================================ */
+buildTableRows(11);
+initDB();
+</script>
+
+<!-- Shared Footer -->
+<div id="fk-footer"></div>
+<script src="layout.js" data-page="form-fillup"></script>
+</body>
+</html>
