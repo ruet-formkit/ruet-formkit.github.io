@@ -122,7 +122,7 @@ Page load
 Clone or download the repository, then open `index.html` in any modern browser.
 
 ```bash
-git clone https://github.com/ruet-formkit/https://ruet-formkit.github.io.git
+git clone https://github.com/ruet-formkit/ruet-formkit.github.io.git
 cd ruet-formkit
 # Open index.html in your browser
 ```
